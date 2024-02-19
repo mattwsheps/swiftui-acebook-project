@@ -18,7 +18,8 @@ public struct Post: Codable, Identifiable {
     
     // Convert createdAtString to a Date object
     public var createdAt: Date {
-        let formatter = ISO8601DateFormatter()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ" // Use the correct format
         return formatter.date(from: createdAtString) ?? Date()
     }
     
@@ -28,3 +29,4 @@ public struct Post: Codable, Identifiable {
         case likes, comments
     }
 }
+

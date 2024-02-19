@@ -7,21 +7,84 @@
 
 import SwiftUI
 
+extension Date {
+    func timeAgo() -> String {
+        let calendar = Calendar.current
+        let now = Date()
+        
+        let components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: self, to: now)
+        
+        if let years = components.year, years > 0 {
+            return "\(years)y"
+        } else if let months = components.month, months > 0 {
+            return "\(months)mo"
+        } else if let days = components.day, days > 0 {
+            return "\(days)d"
+        } else if let hours = components.hour, hours > 0 {
+            return "\(hours)h"
+        } else if let minutes = components.minute, minutes > 0 {
+            return "\(minutes)m"
+        } else {
+            return "now"
+        }
+    }
+}
+
 struct FeedPageView: View {
-    @ObservedObject var authenticationService = AuthenticationService()
-    @State private var token: String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjVkMzc1NGRkZTkyOTg1NjZlYjJjOTFhIiwiaWF0IjoxNzA4MzY0MjI4LCJleHAiOjE3MDgzNjc4Mjh9.tgjApiPNqh-alYuIFLpzwSiLiud5YZDiQNmY91nxK-I"
+    @ObservedObject var postsService = PostsService()
+    @State private var token: String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjVkMzc1NGRkZTkyOTg1NjZlYjJjOTFhIiwiaWF0IjoxNzA4Mzc4MTcwLCJleHAiOjE3MDgzODE3NzB9.UniglmDbqFQLu9Rzm8ZEGZ2uxbIKW1DPt3Pv5IaFNSk"
     
     var body: some View {
-        List(authenticationService.posts) { post in
-            VStack(alignment: .leading) {
-                Text(post.message) // Assuming message is the content of the post
+        List(postsService.posts) { post in
+            // VStack inside RoundedRectangle
+            VStack(alignment: .leading, spacing: 8) {
+                // Created by
+                HStack{
+                    
+                    Image("profile-pic")
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .clipShape(Circle())
+                        .frame(width: 60, height: 60)
+                        
+                        
+                    VStack(alignment: .leading, spacing: 8){
+                        Text("Created by: \(post.createdBy ?? "Unknown")")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                        
+                        // Created at
+                        Text("\(post.createdAt.timeAgo())")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
+                }
+                
+                
+                // Message
+                Text(post.message)
                     .font(.headline)
-                Text(post.image) // Assuming image is the URL or identifier for the post image
-                    .font(.subheadline)
+                    .padding(.bottom, 4) // Add padding at the bottom
+                
+                // Image (assuming image is a URL)
+                if let imageURL = URL(string: post.image) {
+                    // Conditionally render AsyncImage if imageURL is valid
+                    if let imageData = try? Data(contentsOf: imageURL), let uiImage = UIImage(data: imageData) {
+                        AsyncImage(url: imageURL) { image in
+                            image.resizable()
+                                .aspectRatio(contentMode: .fit)
+                        } placeholder: {
+                            // Placeholder view while loading
+                            ProgressView()
+                        }
+                        .frame(maxHeight: 200) // Limit the maximum height of the image
+                    }
+                }
             }
+            .padding() // Add padding to the VStack
         }
         .onAppear {
-            authenticationService.getPosts(token: token)
+            postsService.getPosts(token: token)
         }
     }
 }
