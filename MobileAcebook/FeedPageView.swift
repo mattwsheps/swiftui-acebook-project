@@ -35,6 +35,78 @@ struct FeedPageView: View {
     @State private var token: String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjVkMzc1NGRkZTkyOTg1NjZlYjJjOTFhIiwiaWF0IjoxNzA4Mzc4MTcwLCJleHAiOjE3MDgzODE3NzB9.UniglmDbqFQLu9Rzm8ZEGZ2uxbIKW1DPt3Pv5IaFNSk"
     
     var body: some View {
+        ZStack{
+            Color(red: 242/255, green: 242/255, blue: 247/255)
+                .edgesIgnoringSafeArea(.all)
+            
+            ScrollView{
+                VStack(alignment: .leading, spacing: 20){
+                    Text("Recent")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .multilineTextAlignment(.leading)
+                    ForEach(postsService.posts) { post in
+                        ZStack{
+                            VStack(alignment: .leading, spacing: 8) {
+                                // Created by
+                                HStack{
+                                    
+                                    Image("profile-pic")
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .clipShape(Circle())
+                                        .frame(width: 60, height: 60)
+                                        
+                                        
+                                    VStack(alignment: .leading, spacing: 8){
+                                        Text("Created by: \(post.createdBy ?? "Unknown")")
+                                            .font(.caption)
+                                            .foregroundColor(.gray)
+                                        
+                                        // Created at
+                                        Text("\(post.createdAt.timeAgo())")
+                                            .font(.caption)
+                                            .foregroundColor(.gray)
+                                    }
+                                }
+                                
+                                // Image (assuming image is a URL)
+                                if let imageURL = URL(string: post.image) {
+                                    // Conditionally render AsyncImage if imageURL is valid
+                                    if let imageData = try? Data(contentsOf: imageURL), let uiImage = UIImage(data: imageData) {
+                                        AsyncImage(url: imageURL) { image in
+                                            image.resizable()
+                                                .aspectRatio(contentMode: .fit)
+                                        } placeholder: {
+                                            // Placeholder view while loading
+                                            ProgressView()
+                                        }
+                                        .frame(maxHeight: 200) // Limit the maximum height of the image
+                                    }
+                                }
+                                
+                                // Message
+                                Text(post.message)
+                                    .padding() // Add padding at the bottom
+                                
+                            }
+                            .padding(EdgeInsets(top: 20, leading: 20, bottom: 20, trailing: 20))
+                            .frame(maxWidth: .infinity)
+                            .background(Color.white) // Set background color to white
+                            .cornerRadius(25) // Apply corner radius
+                        }
+                    }
+                    
+                }
+                .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 16))
+            }
+            .onAppear(){
+                postsService.getPosts(token: token)
+            }
+        }
+        
+        
+        
         List(postsService.posts) { post in
             // VStack inside RoundedRectangle
             VStack(alignment: .leading, spacing: 8) {
