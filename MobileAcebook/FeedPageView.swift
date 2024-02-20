@@ -32,7 +32,7 @@ extension Date {
 
 struct FeedPageView: View {
     @ObservedObject var postsService = PostsService()
-    @State private var token: String = "ADD_VALID_TOKEN_HERE"
+    @State private var token: String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjVkMzc1NGRkZTkyOTg1NjZlYjJjOTFhIiwiaWF0IjoxNzA4NDUxNTMyLCJleHAiOjE3MDg0NTUxMzJ9.Jo8eLVru7IHQKehQLm5hYwvJMhaFO_xxuuCev6caH-A"
     
     var body: some View {
         ZStack{
@@ -83,26 +83,43 @@ struct FeedPageView: View {
                                         .frame(maxHeight: 200)
                                     }
                                 }
-                                
                                 // Message
                                 Text(post.message)
                                     .padding(EdgeInsets(top: 10, leading: 0, bottom: 10, trailing: 0))
                                     .font(.title3)
                                 
+                                HStack{
+                                    Image("like-icon-unliked")
+                                        .resizable()
+                                        .frame(width: 25, height: 25)
+                                    
+                                    Text("4 others")
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                    
+                                    Spacer()
+                                    
+                                    Text("2 comments")
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                    
+                                    Image("comment-icon")
+                                        .resizable()
+                                        .frame(width: 25, height: 25)
+                                }
+                                .padding(EdgeInsets(top: 5, leading: 10, bottom: 5, trailing: 10))
                             }
                             .padding(EdgeInsets(top: 20, leading: 20, bottom: 20, trailing: 20))
                             .frame(maxWidth: .infinity)
                             .background(Color.white)
-                            .cornerRadius(30)
+                            .cornerRadius(50)
                         }
                     }
-                    
                 }
                 .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20))
             }
             .onAppear(){
                 postsService.getPosts(token: token)
-                
             }
         }
     }
