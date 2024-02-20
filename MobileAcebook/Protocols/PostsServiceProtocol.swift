@@ -7,4 +7,5 @@
 
 public protocol PostsServiceProtocol {
     func getPosts(token: String)
+    func getPostOwnerData(ownerID:String, token: String, completion: @escaping (User?) -> Void)
 }

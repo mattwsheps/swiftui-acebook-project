@@ -9,9 +9,10 @@ import SwiftUI
 
 public struct Post: Codable, Identifiable {
     public let id: String
-    let message: String
-    let image: String
-    let createdBy: String?
+    var message: String
+    var image: String
+    var createdBy: String?
+    var createdByUsername: String?
     let createdAtString: String // Keep createdAt as a String type
     let likes: [String]
     let comments: Int

@@ -15,15 +15,15 @@ extension Date {
         let components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: self, to: now)
         
         if let years = components.year, years > 0 {
-            return "\(years)y"
+            return "\(years) years ago"
         } else if let months = components.month, months > 0 {
-            return "\(months)mo"
+            return "\(months) months ago"
         } else if let days = components.day, days > 0 {
-            return "\(days)d"
+            return "\(days) days ago"
         } else if let hours = components.hour, hours > 0 {
-            return "\(hours)h"
+            return "\(hours) hours ago"
         } else if let minutes = components.minute, minutes > 0 {
-            return "\(minutes)m"
+            return "\(minutes) mins ago"
         } else {
             return "now"
         }
@@ -32,7 +32,7 @@ extension Date {
 
 struct FeedPageView: View {
     @ObservedObject var postsService = PostsService()
-    @State private var token: String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjVkMzc1NGRkZTkyOTg1NjZlYjJjOTFhIiwiaWF0IjoxNzA4NDIzMjYzLCJleHAiOjE3MDg0MjY4NjN9.sNEyO-UoeX0xE8T3S6WGCEVeAgI64oILv53rg2zxXFA"
+    @State private var token: String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjVkMzc1NGRkZTkyOTg1NjZlYjJjOTFhIiwiaWF0IjoxNzA4NDM5NDc0LCJleHAiOjE3MDg0NDMwNzR9.pIrar9Xv0ilz-5c7vPCBW4JgSzM9PWjPTrgiJjX_j9A"
     
     var body: some View {
         ZStack{
@@ -41,36 +41,34 @@ struct FeedPageView: View {
             
             ScrollView{
                 VStack(alignment: .leading, spacing: 20){
-                    
-                    
                     Text("Recent")
                         .font(.title)
                         .fontWeight(.bold)
-                        .multilineTextAlignment(.leading)
                     ForEach(postsService.posts) { post in
                         ZStack{
                             VStack(alignment: .leading, spacing: 8) {
-                                // Created by
                                 HStack{
                                     
                                     Image("profile-pic")
                                         .resizable()
                                         .aspectRatio(contentMode: .fill)
                                         .clipShape(Circle())
-                                        .frame(width: 60, height: 60)
+                                        .frame(width: 50, height: 50)
                                         
                                         
-                                    VStack(alignment: .leading, spacing: 8){
-                                        Text("Created by: \(post.createdBy ?? "Unknown")")
-                                            .font(.caption)
-                                            .foregroundColor(.gray)
+                                    VStack(alignment: .leading, spacing: 5){
+                                        Text("\(post.createdByUsername ?? "???")")
+                                            .font(.headline)
+                                            .fontWeight(.bold)
                                         
-                                        // Created at
                                         Text("\(post.createdAt.timeAgo())")
-                                            .font(.caption)
+                                            .font(.subheadline)
                                             .foregroundColor(.gray)
                                     }
+                                    Spacer()
                                 }
+                                .frame(maxWidth: .infinity)
+                                
                                 
                                 // Image (assuming image is a URL)
                                 if let imageURL = URL(string: post.image) {
@@ -80,30 +78,31 @@ struct FeedPageView: View {
                                             image.resizable()
                                                 .aspectRatio(contentMode: .fit)
                                         } placeholder: {
-                                            // Placeholder view while loading
                                             ProgressView()
                                         }
-                                        .frame(maxHeight: 200) // Limit the maximum height of the image
+                                        .frame(maxHeight: 200)
                                     }
                                 }
                                 
                                 // Message
                                 Text(post.message)
-                                    .padding() // Add padding at the bottom
+                                    .padding(EdgeInsets(top: 10, leading: 0, bottom: 10, trailing: 0))
+                                    .font(.title3)
                                 
                             }
                             .padding(EdgeInsets(top: 20, leading: 20, bottom: 20, trailing: 20))
                             .frame(maxWidth: .infinity)
-                            .background(Color.white) // Set background color to white
-                            .cornerRadius(25) // Apply corner radius
+                            .background(Color.white)
+                            .cornerRadius(30)
                         }
                     }
                     
                 }
-                .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 16))
+                .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20))
             }
             .onAppear(){
                 postsService.getPosts(token: token)
+                
             }
         }
     }
