@@ -32,7 +32,7 @@ extension Date {
 
 struct FeedPageView: View {
     @ObservedObject var postsService = PostsService()
-    @State private var token: String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjVkMzc1NGRkZTkyOTg1NjZlYjJjOTFhIiwiaWF0IjoxNzA4NDM5NDc0LCJleHAiOjE3MDg0NDMwNzR9.pIrar9Xv0ilz-5c7vPCBW4JgSzM9PWjPTrgiJjX_j9A"
+    @State private var token: String = "ADD_VALID_TOKEN_HERE"
     
     var body: some View {
         ZStack{

@@ -75,7 +75,7 @@ class PostsService: PostsServiceProtocol, ObservableObject {
             do {
                 let response = try JSONDecoder().decode(getPostOwnerDataResponse.self, from: data)
                 DispatchQueue.main.async {
-                    completion(response.ownerData) // Directly pass ownerData to the completion handler
+                    completion(response.ownerData)
                 }
             } catch {
                 print("Error decoding JSON: \(error)")
