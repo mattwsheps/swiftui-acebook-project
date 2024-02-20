@@ -32,7 +32,7 @@ extension Date {
 
 struct FeedPageView: View {
     @ObservedObject var postsService = PostsService()
-    @State private var token: String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjVkMzc1NGRkZTkyOTg1NjZlYjJjOTFhIiwiaWF0IjoxNzA4Mzc4MTcwLCJleHAiOjE3MDgzODE3NzB9.UniglmDbqFQLu9Rzm8ZEGZ2uxbIKW1DPt3Pv5IaFNSk"
+    @State private var token: String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjVkMzc1NGRkZTkyOTg1NjZlYjJjOTFhIiwiaWF0IjoxNzA4NDIzMjYzLCJleHAiOjE3MDg0MjY4NjN9.sNEyO-UoeX0xE8T3S6WGCEVeAgI64oILv53rg2zxXFA"
     
     var body: some View {
         ZStack{
@@ -41,6 +41,8 @@ struct FeedPageView: View {
             
             ScrollView{
                 VStack(alignment: .leading, spacing: 20){
+                    
+                    
                     Text("Recent")
                         .font(.title)
                         .fontWeight(.bold)
@@ -103,60 +105,6 @@ struct FeedPageView: View {
             .onAppear(){
                 postsService.getPosts(token: token)
             }
-        }
-        
-        
-        
-        List(postsService.posts) { post in
-            // VStack inside RoundedRectangle
-            VStack(alignment: .leading, spacing: 8) {
-                // Created by
-                HStack{
-                    
-                    Image("profile-pic")
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .clipShape(Circle())
-                        .frame(width: 60, height: 60)
-                        
-                        
-                    VStack(alignment: .leading, spacing: 8){
-                        Text("Created by: \(post.createdBy ?? "Unknown")")
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                        
-                        // Created at
-                        Text("\(post.createdAt.timeAgo())")
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                    }
-                }
-                
-                
-                // Message
-                Text(post.message)
-                    .font(.headline)
-                    .padding(.bottom, 4) // Add padding at the bottom
-                
-                // Image (assuming image is a URL)
-                if let imageURL = URL(string: post.image) {
-                    // Conditionally render AsyncImage if imageURL is valid
-                    if let imageData = try? Data(contentsOf: imageURL), let uiImage = UIImage(data: imageData) {
-                        AsyncImage(url: imageURL) { image in
-                            image.resizable()
-                                .aspectRatio(contentMode: .fit)
-                        } placeholder: {
-                            // Placeholder view while loading
-                            ProgressView()
-                        }
-                        .frame(maxHeight: 200) // Limit the maximum height of the image
-                    }
-                }
-            }
-            .padding() // Add padding to the VStack
-        }
-        .onAppear {
-            postsService.getPosts(token: token)
         }
     }
 }
