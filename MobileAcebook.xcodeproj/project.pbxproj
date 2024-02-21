@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2AEDE5BF2B83A60200F1F433 /* Post.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AEDE5BE2B83A60200F1F433 /* Post.swift */; };
+		2AEDE5C12B83B19600F1F433 /* FeedPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AEDE5C02B83B19600F1F433 /* FeedPageView.swift */; };
+		2AEDE5C32B8400E300F1F433 /* PostsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AEDE5C22B8400E300F1F433 /* PostsService.swift */; };
+		2AEDE5C52B84013E00F1F433 /* PostsServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AEDE5C42B84013E00F1F433 /* PostsServiceProtocol.swift */; };
 		AE5D85B02AC8A221009680C6 /* MobileAcebookApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE5D85AF2AC8A221009680C6 /* MobileAcebookApp.swift */; };
 		AE5D85B42AC8A224009680C6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AE5D85B32AC8A224009680C6 /* Assets.xcassets */; };
 		AE5D85B72AC8A224009680C6 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AE5D85B62AC8A224009680C6 /* Preview Assets.xcassets */; };
@@ -41,6 +45,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2AEDE5BE2B83A60200F1F433 /* Post.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Post.swift; sourceTree = "<group>"; };
+		2AEDE5C02B83B19600F1F433 /* FeedPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedPageView.swift; sourceTree = "<group>"; };
+		2AEDE5C22B8400E300F1F433 /* PostsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostsService.swift; sourceTree = "<group>"; };
+		2AEDE5C42B84013E00F1F433 /* PostsServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostsServiceProtocol.swift; sourceTree = "<group>"; };
 		AE5D85AC2AC8A221009680C6 /* MobileAcebook.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MobileAcebook.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AE5D85AF2AC8A221009680C6 /* MobileAcebookApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileAcebookApp.swift; sourceTree = "<group>"; };
 		AE5D85B32AC8A224009680C6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -115,6 +123,7 @@
 				AE5D85B32AC8A224009680C6 /* Assets.xcassets */,
 				AE5D85B52AC8A224009680C6 /* Preview Content */,
 				AE5D85D92AC8A337009680C6 /* WelcomePageView.swift */,
+				2AEDE5C02B83B19600F1F433 /* FeedPageView.swift */,
 				D93477972B83B31A00EF2F89 /* SignUpView.swift */,
 				D9B1CB132B84E3430058D817 /* SignUpViewController.swift */,
 			);
@@ -152,6 +161,7 @@
 			isa = PBXGroup;
 			children = (
 				AE5D85E02AC9AFA9009680C6 /* AuthenticationService.swift */,
+				2AEDE5C22B8400E300F1F433 /* PostsService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -168,6 +178,7 @@
 			isa = PBXGroup;
 			children = (
 				AE5D85E72AC9B29A009680C6 /* User.swift */,
+				2AEDE5BE2B83A60200F1F433 /* Post.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -176,6 +187,7 @@
 			isa = PBXGroup;
 			children = (
 				AE5D85E52AC9B077009680C6 /* AuthenticationServiceProtocol.swift */,
+				2AEDE5C42B84013E00F1F433 /* PostsServiceProtocol.swift */,
 			);
 			path = Protocols;
 			sourceTree = "<group>";
@@ -312,11 +324,15 @@
 			files = (
 				AE5D85E12AC9AFA9009680C6 /* AuthenticationService.swift in Sources */,
 				D9B1CB142B84E3430058D817 /* SignUpViewController.swift in Sources */,
+				2AEDE5C12B83B19600F1F433 /* FeedPageView.swift in Sources */,
+				2AEDE5C52B84013E00F1F433 /* PostsServiceProtocol.swift in Sources */,
 				AE5D85E62AC9B077009680C6 /* AuthenticationServiceProtocol.swift in Sources */,
 				AE5D85B02AC8A221009680C6 /* MobileAcebookApp.swift in Sources */,
+				2AEDE5BF2B83A60200F1F433 /* Post.swift in Sources */,
 				AE5D85E82AC9B29A009680C6 /* User.swift in Sources */,
 				D93477982B83B31A00EF2F89 /* SignUpView.swift in Sources */,
 				AE5D85DA2AC8A337009680C6 /* WelcomePageView.swift in Sources */,
+				2AEDE5C32B8400E300F1F433 /* PostsService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

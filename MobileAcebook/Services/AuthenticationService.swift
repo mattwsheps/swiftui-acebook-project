@@ -5,9 +5,9 @@
 //  Created by Josué Estévez Fernández on 01/10/2023.
 //
 
-import Foundation
+import SwiftUI
 
-class AuthenticationService: AuthenticationServiceProtocol {
+class AuthenticationService: AuthenticationServiceProtocol, ObservableObject {
     func signUp(user: User) -> Bool {
         guard let url = URL(string: "http://127.0.0.1:8080/users") else { return false }
         var request = URLRequest(url:url)
