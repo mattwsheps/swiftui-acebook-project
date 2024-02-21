@@ -3,3 +3,5 @@
 *.xcworkspace/xcuserdata/
 DerivedData/
 build/
+.DS_Store
+*.MobileAcebook.xcodeproj
