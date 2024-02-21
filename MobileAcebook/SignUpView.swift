@@ -89,6 +89,15 @@ struct SignUpView: View {
                     
                 }
                 
+                Section {
+                    Button("Upload Profile Picture") {
+                        
+                    }
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+                    
+                }
+                
                 Button("Sign up") {
                     
                     resetCheckers()
@@ -113,7 +122,7 @@ struct SignUpView: View {
                         return
                     }
                     
-                    let user = User(email: email, username: username, password: password, avatar: "placeholder.png")
+                    let user = User(id: nil, username: username, avatar: "placeholder.png", email: email,  password: password)
                     authentication.signUp(user: user)
                     
                     
