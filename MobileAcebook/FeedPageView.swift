@@ -34,8 +34,13 @@ struct FeedPageView: View {
     @ObservedObject var postsService = PostsService()
     @State private var newPostMessage: String = ""
     @State private var newPostImageURL: String = ""
-    @State private var token: String = "ADD_TOKEN_HERE"
     
+    @State private var isShowingCommentSheet = false
+    @State private var commentText = ""
+    
+    @State private var token: String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjVkNWU0Njg0ZjE0YTNhYmRkNTA3MjY1IiwiaWF0IjoxNzA4NTI0MzU4LCJleHAiOjE3MDg1Mjc5NTh9.I7LXcxMeb2S4zkbyWACX4JkDd0q48QLbXOyDUSfSG70"
+    
+  
     var body: some View {
         ZStack{
             Color(red: 242/255, green: 242/255, blue: 247/255)
@@ -83,61 +88,174 @@ struct FeedPageView: View {
                     .padding()
                     
                     ForEach(postsService.posts) { post in
-                        ZStack{
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack{
-                                    Image("profile-pic")
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fill)
-                                        .clipShape(Circle())
+                        
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack{
+                                if let avatarURLString = post.createdByAvatar, let avatarURL = URL(string: avatarURLString) {
+                                    AsyncImage(url: avatarURL) { image in
+                                        image
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fill)
+                                            .clipShape(Circle())
+                                            .frame(width: 50, height: 50)
+                                    } placeholder: {
+                                        Color.gray
+                                            .frame(width: 50, height: 50)
+                                            .clipShape(Circle())
+                                            .overlay(
+                                                Image(systemName: "person.fill")
+                                                    .resizable()
+                                                    .frame(width: 30, height: 30)
+                                                    .aspectRatio(contentMode: .fill)
+                                                    .foregroundColor(.white)
+                                            )
+                                    }
+                                } else {
+                                    Color.gray
                                         .frame(width: 50, height: 50)
-                                    
-                                    VStack(alignment: .leading, spacing: 5){
-                                        Text("\(post.createdByUsername ?? "???")")
-                                            .font(.headline)
-                                            .fontWeight(.bold)
-                                        
-                                        Text("\(post.createdAt.timeAgo())")
-                                            .font(.subheadline)
-                                            .foregroundColor(.gray)
-                                    }
-                                    Spacer()
-                                }
-                                .frame(maxWidth: .infinity)
-                                if let imageURL = URL(string: post.image) {
-                                    if let imageData = try? Data(contentsOf: imageURL), let uiImage = UIImage(data: imageData) {
-                                        AsyncImage(url: imageURL) { image in
-                                            image.resizable()
-                                                .aspectRatio(contentMode: .fit)
-                                        } placeholder: {
-                                            ProgressView()
-                                        }
-                                        .frame(maxHeight: 200)
-                                    }
+                                        .clipShape(Circle())
+                                        .overlay(
+                                            Image(systemName: "person.fill")
+                                                .resizable()
+                                                .frame(width: 30, height: 30)
+                                                .aspectRatio(contentMode: .fill)
+                                                .foregroundColor(.white)
+                                        )
                                 }
                                 
-                                Text(post.message)
-                                    .padding(EdgeInsets(top: 10, leading: 0, bottom: 10, trailing: 0))
-                                    .font(.title3)
+                                VStack(alignment: .leading, spacing: 5){
+                                    Text("\(post.createdByUsername ?? "???")")
+                                        .font(.headline)
+                                        .fontWeight(.bold)
+                                    
+                                    Text("\(post.createdAt.timeAgo())")
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                }
+                                Spacer()
                             }
-                            .padding(EdgeInsets(top: 20, leading: 20, bottom: 20, trailing: 20))
                             .frame(maxWidth: .infinity)
-                            .background(Color.white)
-                            .cornerRadius(30)
+                            if let imageURL = URL(string: post.image) {
+                                if let imageData = try? Data(contentsOf: imageURL), let uiImage = UIImage(data: imageData) {
+                                    AsyncImage(url: imageURL) { image in
+                                        image.resizable()
+                                            .aspectRatio(contentMode: .fit)
+                                    } placeholder: {
+                                        ProgressView()
+                                    }
+                                    .frame(maxHeight: 200)
+                                }
+                            }
+                            
+                            Text(post.message)
+                                .padding(EdgeInsets(top: 10, leading: 0, bottom: 10, trailing: 0))
+                                .font(.title3)
+                            
+                            HStack{
+                                Button(action: {
+                                    postsService.likePost(token: token, postID: post.id) { likesCount in
+                                        // Handle the response if needed, such as updating UI based on likesCount
+                                        if let likesCount = likesCount {
+                                            // Update UI or perform actions based on the likesCount
+                                            print("Likes count: \(likesCount)")
+                                        } else {
+                                            // Handle error or nil response if needed
+                                            print("Failed to like the post.")
+                                        }
+                                        toggleLike(for: post.id)
+                                    }
+                                }) {
+                                    Image(postsService.likedStates[post.id] == true ? "like-icon-liked" : "like-icon-unliked")
+                                        .resizable()
+                                        .frame(width: 25, height: 25)
+                                }
+                                
+                                Text("\(post.likesCount ?? 0) likes")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                                
+                                Spacer()
+                                
+                                Text("\(post.comments) comments")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                                
+                                Button(action: {
+                                    // Show the comment sheet
+                                    isShowingCommentSheet.toggle()
+                                }) {
+                                    Image("comment-icon")
+                                        .resizable()
+                                        .frame(width: 25, height: 25)
+                                }
+                                .sheet(isPresented: $isShowingCommentSheet) {
+                                    // Content of the comment sheet
+                                    CommentSheetView(commentText: $commentText)
+                                }
+                            }
+                            .padding(EdgeInsets(top: 5, leading: 10, bottom: 5, trailing: 10))
                         }
+                        .padding(EdgeInsets(top: 20, leading: 20, bottom: 20, trailing: 20))
+                        .frame(maxWidth: .infinity)
+                        .background(Color.white)
+                        .cornerRadius(50)
                     }
                 }
                 .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20))
+                
             }
             .onAppear(){
                 postsService.getPosts(token: token)
             }
         }
     }
+    private func toggleLike(for postID: String) {
+        postsService.likedStates[postID] = !(postsService.likedStates[postID] ?? false)
+    }
 }
 
 struct FeedPageView_Previews: PreviewProvider {
     static var previews: some View {
         FeedPageView()
+    }
+}
+
+struct CommentSheetView: View {
+    @Binding var commentText: String
+    
+    var body: some View {
+        VStack {
+            Text("Comments")
+                .padding()
+            Text("Comments")
+                .padding()
+            Text("Comments")
+                .padding()
+            Text("Comments")
+                .padding()
+            
+            Spacer() // Spacer to push content to the top
+            
+            // Comment bar
+            HStack {
+                TextField("Write a comment...", text: $commentText)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding(.horizontal)
+                
+                Button(action: {
+                    // Action to handle comment submission
+                    print("Comment submitted: \(commentText)")
+                    commentText = "" // Clear text field after submission
+                }) {
+                    Text("Send")
+                }
+                .padding(.trailing)
+                .disabled(commentText.isEmpty) // Disable the button if the text field is empty
+            }
+            .padding()
+            .background(Color.gray.opacity(0.1))
+            .cornerRadius(10)
+            .padding(.horizontal)
+        }
     }
 }

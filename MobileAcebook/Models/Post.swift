@@ -13,8 +13,10 @@ public struct Post: Codable, Identifiable {
     var image: String
     var createdBy: String?
     var createdByUsername: String?
+    var createdByAvatar: String?
     let createdAtString: String // Keep createdAt as a String type
-    let likes: [String]
+    var likes: [String]
+    var likesCount: Int?
     let comments: Int
     
     // Convert createdAtString to a Date object
