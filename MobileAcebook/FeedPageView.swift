@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import PhotosUI
 
 extension Date {
     func timeAgo() -> String {
@@ -35,12 +36,15 @@ struct FeedPageView: View {
     @State private var newPostMessage: String = ""
     @State private var newPostImageURL: String = ""
     
+    @State private var showingImagePicker = false
+    @State private var inputImage: UIImage?
+    
     @State private var isShowingCommentSheet = false
     @State private var commentText = ""
     
-    @State private var token: String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjVkNWU0Njg0ZjE0YTNhYmRkNTA3MjY1IiwiaWF0IjoxNzA4NTI0MzU4LCJleHAiOjE3MDg1Mjc5NTh9.I7LXcxMeb2S4zkbyWACX4JkDd0q48QLbXOyDUSfSG70"
+    @State private var token: String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjVkNWU0Njg0ZjE0YTNhYmRkNTA3MjY1IiwiaWF0IjoxNzA4NTM4NjA5LCJleHAiOjE3MDg1NDIyMDl9.Zb8R_A4c__1XTT0cIXqap0b0DdtWy9WqKfz6HNCPQUA"
     
-  
+    
     var body: some View {
         ZStack{
             Color(red: 242/255, green: 242/255, blue: 247/255)
@@ -48,44 +52,119 @@ struct FeedPageView: View {
             
             ScrollView{
                 VStack(alignment: .leading, spacing: 20){
+                    Text("Feed")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                    HStack(spacing: 10){
+                        if let avatarURLString = postsService.user?.avatar, let avatarURL = URL(string: avatarURLString) {
+                            AsyncImage(url: avatarURL) { image in
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .clipShape(Circle())
+                                    .frame(width: 80, height: 80)
+                            } placeholder: {
+                                Color.gray
+                                    .frame(width: 80, height: 80)
+                                    .clipShape(Circle())
+                                    .overlay(
+                                        Image(systemName: "person.fill")
+                                            .resizable()
+                                            .frame(width: 45, height: 45)
+                                            .aspectRatio(contentMode: .fill)
+                                            .foregroundColor(.white)
+                                    )
+                            }
+                        } else {
+                            Color.gray
+                                .frame(width: 50, height: 50)
+                                .clipShape(Circle())
+                                .overlay(
+                                    Image(systemName: "person.fill")
+                                        .resizable()
+                                        .frame(width: 30, height: 30)
+                                        .aspectRatio(contentMode: .fill)
+                                        .foregroundColor(.white)
+                                )
+                        }
+                        
+                        VStack(alignment: .center, spacing: 10) {
+                            TextField("What's on your mind?", text: $newPostMessage)
+                                .padding()
+                                .background(Color.gray.opacity(0.2))
+                                .cornerRadius(30)
+                                .multilineTextAlignment(.leading)
+                                .keyboardType(.default)
+                                .autocapitalization(.none)
+
+                            
+                            HStack{
+                                Button(action: {
+                                    print("Select Image button was tapped.")
+                                    showingImagePicker = true
+                                }) {
+                                    HStack{
+                                        Image("photo-icon")
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fit)
+                                            .frame(width: 25, height: 25)
+                                        Text("Image")
+                                            .foregroundColor(.gray)
+                                    }
+                                    .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 15))
+                                    .background(Color.white)
+                                    .cornerRadius(30)
+                                    
+                                }
+                                .sheet(isPresented: $showingImagePicker) {
+                                    PhotoPicker(image: self.$inputImage)
+                                }
+                                
+                                Spacer()
+                                
+                                Button(action: {
+                                    print("Post button was tapped.")
+                                    if let inputImage = inputImage {
+                                        print("An image is selected for posting.")
+                                        uploadImageAndCreatePost(image: inputImage)
+                                    } else {
+                                        print("No image is selected, creating a text-only post.")
+                                        createPost(with: nil)
+                                    }
+                                }) {
+                                    HStack{
+                                        Text("Post")
+                                            .foregroundColor(.gray)
+                                        Image(systemName: "paperplane.fill")
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fit)
+                                            .frame(width: 25, height: 25)
+                                    }
+                                    .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 15))
+                                    .background(Color.white)
+                                    .cornerRadius(30)
+                                }
+                                .disabled(newPostMessage.isEmpty)
+                            }
+                            
+                        }
+                        
+                    }
+                    VStack(alignment: .center){
+                        if let inputImage = inputImage {
+                            Image(uiImage: inputImage)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: 200)
+                                .padding()
+                        }
+                    }
+                    
+                    
                     Text("Recent")
                         .font(.title)
                         .fontWeight(.bold)
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        TextField("What's on your mind?", text: $newPostMessage)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .padding()
-                        
-                        TextField("Image URL (optional)", text: $newPostImageURL)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .padding()
-                        
-                        Button(action: {
-                            postsService.createPost(token: token, message: newPostMessage, image: newPostImageURL.isEmpty ? nil : newPostImageURL) { success, error in
-                                if success {
-                                    newPostMessage = ""
-                                    newPostImageURL = ""
-                                    // Fetch the latest posts
-                                    postsService.getPosts(token: token)
-                                } else {
-                                    // Handle the error, e.g., show an alert to the user
-                                    print(error?.localizedDescription ?? "Failed to create post")
-                                }
-                            }
-                        }) {
-                            Text("Post")
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.blue)
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
-                        }
-                        .padding()
-                    }
-                    .background(Color.white)
-                    .cornerRadius(15)
-                    .padding()
+                     
                     
                     ForEach(postsService.posts) { post in
                         
@@ -209,10 +288,71 @@ struct FeedPageView: View {
             }
         }
     }
+    // Function to load an image
+    func loadImage() {
+        print("loadImage() was called.")
+        guard let selectedImage = inputImage else {
+            print("No image is selected.")
+            return
+        }
+        print("Proceeding to upload the selected image.")
+        postsService.uploadImageToCloudinary(imageData: selectedImage.jpegData(compressionQuality: 0.8)!) { result in
+            switch result {
+            case .success(let imageUrl):
+                // Use the imageUrl for creating a new post
+                createPost(with: imageUrl)
+            case .failure(let error):
+                // Handle the error
+                print("Image upload failed: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    // Function to upload an image
+    func uploadImageAndCreatePost(image: UIImage) {
+        print("Uploading image to Cloudinary...")
+        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+            print("Failed to get JPEG data from the image.")
+            return
+        }
+        
+        postsService.uploadImageToCloudinary(imageData: imageData) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let imageUrl):
+                    print("Image uploaded successfully. Image URL: \(imageUrl)")
+                    print("Creating post with image URL...")
+                    self.createPost(with: imageUrl)
+                case .failure(let error):
+                    print("Failed to upload image: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+    
+    // Function to create a post
+    func createPost(with imageUrl: String?) {
+        print("Creating post with image URL: \(String(describing: imageUrl))")
+        postsService.createPost(token: token, message: newPostMessage, image: imageUrl) { success, error in
+            if success {
+                // Reset the form on success
+                newPostMessage = ""
+                inputImage = nil
+                // Fetch the latest posts
+                postsService.getPosts(token: token)
+            } else {
+                // Handle the error
+                print(error?.localizedDescription ?? "Failed to create post")
+            }
+        }
+    }
     private func toggleLike(for postID: String) {
         postsService.likedStates[postID] = !(postsService.likedStates[postID] ?? false)
     }
 }
+
+
+
 
 struct FeedPageView_Previews: PreviewProvider {
     static var previews: some View {
