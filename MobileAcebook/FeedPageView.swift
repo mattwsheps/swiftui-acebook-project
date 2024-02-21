@@ -90,7 +90,7 @@ struct FeedPageView: View {
                         
                         VStack(alignment: .center, spacing: 10) {
                             TextField("What's on your mind?", text: $newPostMessage)
-                                .padding()
+                                .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 15))
                                 .background(Color.gray.opacity(0.2))
                                 .cornerRadius(30)
                                 .multilineTextAlignment(.leading)
@@ -107,7 +107,7 @@ struct FeedPageView: View {
                                         Image("photo-icon")
                                             .resizable()
                                             .aspectRatio(contentMode: .fit)
-                                            .frame(width: 25, height: 25)
+                                            .frame(width: 20, height: 20)
                                         Text("Image")
                                             .foregroundColor(.gray)
                                     }
@@ -138,7 +138,7 @@ struct FeedPageView: View {
                                         Image(systemName: "paperplane.fill")
                                             .resizable()
                                             .aspectRatio(contentMode: .fit)
-                                            .frame(width: 25, height: 25)
+                                            .frame(width: 20, height: 20)
                                     }
                                     .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 15))
                                     .background(Color.white)
