@@ -32,7 +32,9 @@ extension Date {
 
 struct FeedPageView: View {
     @ObservedObject var postsService = PostsService()
-    @State private var token: String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjVkMzc1NGRkZTkyOTg1NjZlYjJjOTFhIiwiaWF0IjoxNzA4NDUxNTMyLCJleHAiOjE3MDg0NTUxMzJ9.Jo8eLVru7IHQKehQLm5hYwvJMhaFO_xxuuCev6caH-A"
+    @State private var newPostMessage: String = ""
+    @State private var newPostImageURL: String = ""
+    @State private var token: String = "ADD_TOKEN_HERE"
     
     var body: some View {
         ZStack{
@@ -44,18 +46,52 @@ struct FeedPageView: View {
                     Text("Recent")
                         .font(.title)
                         .fontWeight(.bold)
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        TextField("What's on your mind?", text: $newPostMessage)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .padding()
+                        
+                        TextField("Image URL (optional)", text: $newPostImageURL)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .padding()
+                        
+                        Button(action: {
+                            postsService.createPost(token: token, message: newPostMessage, image: newPostImageURL.isEmpty ? nil : newPostImageURL) { success, error in
+                                if success {
+                                    newPostMessage = ""
+                                    newPostImageURL = ""
+                                    // Fetch the latest posts
+                                    postsService.getPosts(token: token)
+                                } else {
+                                    // Handle the error, e.g., show an alert to the user
+                                    print(error?.localizedDescription ?? "Failed to create post")
+                                }
+                            }
+                        }) {
+                            Text("Post")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                        }
+                        .padding()
+                    }
+                    .background(Color.white)
+                    .cornerRadius(15)
+                    .padding()
+                    
                     ForEach(postsService.posts) { post in
                         ZStack{
                             VStack(alignment: .leading, spacing: 8) {
                                 HStack{
-                                    
                                     Image("profile-pic")
                                         .resizable()
                                         .aspectRatio(contentMode: .fill)
                                         .clipShape(Circle())
                                         .frame(width: 50, height: 50)
-                                        
-                                        
+                                    
                                     VStack(alignment: .leading, spacing: 5){
                                         Text("\(post.createdByUsername ?? "???")")
                                             .font(.headline)
@@ -68,11 +104,7 @@ struct FeedPageView: View {
                                     Spacer()
                                 }
                                 .frame(maxWidth: .infinity)
-                                
-                                
-                                // Image (assuming image is a URL)
                                 if let imageURL = URL(string: post.image) {
-                                    // Conditionally render AsyncImage if imageURL is valid
                                     if let imageData = try? Data(contentsOf: imageURL), let uiImage = UIImage(data: imageData) {
                                         AsyncImage(url: imageURL) { image in
                                             image.resizable()
@@ -83,7 +115,7 @@ struct FeedPageView: View {
                                         .frame(maxHeight: 200)
                                     }
                                 }
-                                // Message
+                                
                                 Text(post.message)
                                     .padding(EdgeInsets(top: 10, leading: 0, bottom: 10, trailing: 0))
                                     .font(.title3)
