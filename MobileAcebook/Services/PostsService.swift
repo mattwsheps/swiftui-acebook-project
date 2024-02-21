@@ -20,6 +20,7 @@ struct getPostOwnerDataResponse: Codable {
 
 class PostsService: PostsServiceProtocol, ObservableObject {
     @Published var posts: [Post] = []
+    private let baseUrlString = "http://127.0.0.1:8080"
     
     func getPosts(token: String) {
         guard let url = URL(string: "http://127.0.0.1:8080/posts") else { return }
@@ -83,5 +84,38 @@ class PostsService: PostsServiceProtocol, ObservableObject {
             }
         }.resume()
     }
+    
+    func createPost(token: String, message: String, image: String?, completion: @escaping (Bool, Error?) -> Void) {
+            guard let url = URL(string: "\(baseUrlString)/posts") else { return } // if the baseurl is false return does not run the code
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization") // Include the Authorization header
+            
+            let parameters: [String: Any] = [
+                "message": message,
+                "publicID": image ?? ""
+            ]
+            
+            request.httpBody = try? JSONSerialization.data(withJSONObject: parameters, options: [])
+            
+            URLSession.shared.dataTask(with: request) { data, response, error in
+                guard let httpResponse = response as? HTTPURLResponse, error == nil else {
+                    completion(false, error)
+                    return
+                }
+                
+                // Check the response status code for success
+                if (200...299).contains(httpResponse.statusCode) {
+                    completion(true, nil)
+                } else {
+                    print("Unexpected status code: \(httpResponse.statusCode)")
+                    if let data = data, let responseBody = String(data: data, encoding: .utf8) {
+                        print("Response body: \(responseBody)")
+                    }
+                    completion(false, nil)
+                }
+            }.resume()
+        }
 }
 
