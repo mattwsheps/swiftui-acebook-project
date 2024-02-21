@@ -9,29 +9,31 @@ import SwiftUI
 
 struct WelcomePageView: View {
     var body: some View {
-        ZStack {
+        NavigationView {
             VStack {
                 Spacer()
 
-                Text("Welcome to Acebook!")
-                    .font(.largeTitle)
-                    .padding(.bottom, 20)
-                    .accessibilityIdentifier("welcomeText")
 
-                Spacer()
 
-                Image("makers-logo")
+                Image("Acebook-logo")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 200, height: 200)
                     .accessibilityIdentifier("makers-logo")
                 
                 Spacer()
-
-                Button("Sign Up") {
-                    // TODO: sign up logic
+                NavigationLink(destination: SignUpView()){
+                    Text("Login")
+                        .fontWeight(.bold)
+                        .padding(.bottom, 25)
+                        .font(.largeTitle)
                 }
-                .accessibilityIdentifier("signUpButton")
+                
+                NavigationLink(destination: SignUpView()) {
+                    Text("Sign Up")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                }
                 
                 Spacer()
             }
