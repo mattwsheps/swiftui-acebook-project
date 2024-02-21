@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+
 extension Date {
     func timeAgo() -> String {
         let calendar = Calendar.current
@@ -32,9 +33,11 @@ extension Date {
 
 struct FeedPageView: View {
     @ObservedObject var postsService = PostsService()
+    @ObservedObject var authenticationService = AuthenticationService()
     @State private var newPostMessage: String = ""
     @State private var newPostImageURL: String = ""
-    @State private var token: String = "ADD_TOKEN_HERE"
+    @State private var token: String = ""
+   
     
     var body: some View {
         ZStack{
@@ -130,6 +133,7 @@ struct FeedPageView: View {
                 .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20))
             }
             .onAppear(){
+                token = authenticationService.token
                 postsService.getPosts(token: token)
             }
         }
