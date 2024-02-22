@@ -30,9 +30,11 @@ struct SignUpView: View {
     var body: some View {
         Section(header: Text("Sign up").multilineTextAlignment(.center).bold().fixedSize().font(.largeTitle)) {
             Form {
+
                 Section(header: Text("Email")){
                     TextField("Enter your email", text: $email).autocapitalization(/*@START_MENU_TOKEN@*/.none/*@END_MENU_TOKEN@*/)
                         
+
                     if invalidEmailMessage {
                         Text("Email is invalid")
                             .foregroundColor(Color.red)
@@ -42,8 +44,11 @@ struct SignUpView: View {
                     }
                 }
                 
+   
+                
                 Section(header: Text("Username")){
                     TextField("Enter a username", text: $username).autocapitalization(/*@START_MENU_TOKEN@*/.none/*@END_MENU_TOKEN@*/)
+
                     
                     if !validUsername {
                         Text("Please enter a username")
@@ -119,6 +124,8 @@ struct SignUpView: View {
                     }
                     
                     if let imageData = inputImage?.jpegData(compressionQuality: 0.8) {
+
+                        // Upload the image first
                         PostsService().uploadImageToCloudinary(imageData: imageData) { result in
                             switch result {
                             case .success(let imageUrl):
