@@ -27,6 +27,7 @@ class PostsService: PostsServiceProtocol, ObservableObject {
     @Published var posts: [Post] = []
     @Published var user: User?
     @Published var likedStates: [String: Bool] = [:]
+    @Published var token: String = ""
     private let baseUrlString = "http://127.0.0.1:8080"
     
     func getPosts(token: String) {
@@ -49,6 +50,7 @@ class PostsService: PostsServiceProtocol, ObservableObject {
                 DispatchQueue.main.async {
                     self.posts = response.posts
                     self.user = response.user
+                    self.token = response.token
                     if let userID = self.user?.id {
                         for post in self.posts {
                             let isLiked = post.likes.contains(userID)
@@ -92,6 +94,7 @@ class PostsService: PostsServiceProtocol, ObservableObject {
             do {
                 let response = try JSONDecoder().decode(getPostOwnerDataResponse.self, from: data)
                 DispatchQueue.main.async {
+                    self.token = response.token
                     completion(response.ownerData)
                 }
             } catch {

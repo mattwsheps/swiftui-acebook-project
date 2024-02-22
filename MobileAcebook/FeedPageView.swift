@@ -8,6 +8,7 @@
 import SwiftUI
 import PhotosUI
 
+
 extension Date {
     func timeAgo() -> String {
         let calendar = Calendar.current
@@ -33,6 +34,7 @@ extension Date {
 
 struct FeedPageView: View {
     @ObservedObject var postsService = PostsService()
+    @ObservedObject var authService: AuthenticationService
     @State private var newPostMessage: String = ""
     @State private var newPostImageURL: String = ""
     
@@ -42,10 +44,9 @@ struct FeedPageView: View {
     @State private var isShowingCommentSheet = false
     @State private var commentText = ""
     
-    // login token
-    @State private var token: String = "LOGIN TOKEN HERE"
-    @State private var isLoggedOut = false
-    
+    @State private var token: String = ""
+    @State private var isLoggedOut: Bool = false
+
     
     var body: some View {
         ZStack{
@@ -79,12 +80,12 @@ struct FeedPageView: View {
                             }
                         } else {
                             Color.gray
-                                .frame(width: 50, height: 50)
+                                .frame(width: 80, height: 80)
                                 .clipShape(Circle())
                                 .overlay(
                                     Image(systemName: "person.fill")
                                         .resizable()
-                                        .frame(width: 30, height: 30)
+                                        .frame(width: 45, height: 45)
                                         .aspectRatio(contentMode: .fill)
                                         .foregroundColor(.white)
                                 )
@@ -282,6 +283,8 @@ struct FeedPageView: View {
                 .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20))
             }
             .onAppear(){
+                token = authService.token
+                print("token =", authService.token)
                 postsService.getPosts(token: token)
             }
             // logout button
@@ -367,12 +370,11 @@ struct FeedPageView: View {
     }
 }
 
-
-
-
 struct FeedPageView_Previews: PreviewProvider {
     static var previews: some View {
-        FeedPageView()
+        let mockAuthService = AuthenticationService()
+        mockAuthService.token = "your_desired_token_value"
+        return FeedPageView(authService: mockAuthService)
     }
 }
 
