@@ -42,7 +42,7 @@ struct FeedPageView: View {
     @State private var isShowingCommentSheet = false
     @State private var commentText = ""
     
-    @State private var token: String = "ADD_YOUR_TOKEN_HERE"
+    @State private var token: String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjVkNDg1NGJkYTUzNGQ2ZmRmZWMxZDZmIiwiaWF0IjoxNzA4NTk3MDEyLCJleHAiOjE3MDg2NTcwMTJ9.Nfg36CVPPfP3_f8ZqTqKF-MZN77HOWKCD2q3IYUdg8c"
     
     
     var body: some View {
@@ -215,15 +215,12 @@ struct FeedPageView: View {
                             }
                             .frame(maxWidth: .infinity)
                             if let imageURL = URL(string: post.image) {
-                                if let imageData = try? Data(contentsOf: imageURL), let uiImage = UIImage(data: imageData) {
-                                    AsyncImage(url: imageURL) { image in
-                                        image.resizable()
-                                            .aspectRatio(contentMode: .fit)
-                                    } placeholder: {
-                                        ProgressView()
-                                    }
-                                    .frame(maxHeight: 200)
-                                }
+                                AsyncImageView(imageUrl: imageURL)
+                                            .frame(height: 200) // Set the desired frame
+                                            .padding()
+                            } else {
+                                // Fallback content if there's no image URL
+                                Text("No image available")
                             }
                             
                             Text(post.message)

@@ -9,32 +9,28 @@ import Foundation
 import SwiftUI
 import AuthenticationServices
 
-
 struct SignUpView: View {
     
-    @State var email = "";
-    @State var username = "";
-    @State var password = "";
-    @State var confirmPassword = "";
+    @State var email = ""
+    @State var username = ""
+    @State var password = ""
+    @State var confirmPassword = ""
     
-        
-    @State private var invalidEmailMessage = false;
+    @State private var invalidEmailMessage = false
     @State private var validUsername = true
-    @State private var passwordValidation = 0;
-    @State private var passwordMismatch = false;
-    
+    @State private var passwordValidation = 0
+    @State private var passwordMismatch = false
+    @State private var showingImagePicker = false
+    @State private var inputImage: UIImage?
     @StateObject private var authVM = AuthenticationViewModel()
-    private let authentication = AuthenticationService();
+    private let authentication = AuthenticationService()
     
     var body: some View {
-        
-        
-        
-        Section (header: Text("Sign up").multilineTextAlignment(.center).bold().fixedSize().font(/*@START_MENU_TOKEN@*/.largeTitle/*@END_MENU_TOKEN@*/)){
+        Section(header: Text("Sign up").multilineTextAlignment(.center).bold().fixedSize().font(.largeTitle)) {
             Form {
-                Section(header: Text("Email")){
+                Section(header: Text("Email")) {
                     TextField("Enter your email", text: $email)
-                        
+                    
                     if invalidEmailMessage {
                         Text("Email is invalid")
                             .foregroundColor(Color.red)
@@ -44,9 +40,7 @@ struct SignUpView: View {
                     }
                 }
                 
-                
-                
-                Section(header: Text("Username")){
+                Section(header: Text("Username")) {
                     TextField("Enter a username", text: $username)
                     
                     if !validUsername {
@@ -57,7 +51,8 @@ struct SignUpView: View {
                             .listRowBackground(Color(UIColor.systemGroupedBackground))
                     }
                 }
-                Section(header: Text("Password")){
+                
+                Section(header: Text("Password")) {
                     SecureField("Enter a password", text: $password)
                     
                     if passwordValidation == 1 {
@@ -67,16 +62,15 @@ struct SignUpView: View {
                             .frame(maxWidth: .infinity)
                             .listRowBackground(Color(UIColor.systemGroupedBackground))
                     } else if passwordValidation == 2 {
-                        Text("Please include a lower case character, uppercase character and number")
+                        Text("Please include a lowercase character, uppercase character, and number")
                             .foregroundColor(Color.red)
                             .multilineTextAlignment(.center)
                             .frame(maxWidth: .infinity)
                             .listRowBackground(Color(UIColor.systemGroupedBackground))
                     }
-                    
                 }
                 
-                Section(header: Text("Confirm Password")){
+                Section(header: Text("Confirm Password")) {
                     SecureField("Repeat password", text: $confirmPassword)
                     
                     if passwordMismatch {
@@ -86,24 +80,24 @@ struct SignUpView: View {
                             .frame(maxWidth: .infinity)
                             .listRowBackground(Color(UIColor.systemGroupedBackground))
                     }
-                    
                 }
                 
                 Section {
                     Button("Upload Profile Picture") {
-                        
+                        showingImagePicker = true
+                    }
+                    .sheet(isPresented: $showingImagePicker) {
+                        PhotoPicker(image: self.$inputImage)
                     }
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: .infinity)
-                    
                 }
                 
                 Button("Sign up") {
-                    
                     resetCheckers()
                     
                     if !isValidEmail(email: email) {
-                        invalidEmailMessage = true;
+                        invalidEmailMessage = true
                         return
                     }
                     
@@ -118,16 +112,38 @@ struct SignUpView: View {
                     }
                     
                     if password != confirmPassword {
-                        passwordMismatch = true;
+                        passwordMismatch = true
                         return
                     }
                     
-                    let user = User(id: nil, username: username, avatar: "placeholder.png", email: email,  password: password)
-                    authentication.signUp(user: user)
-                    
-                    
-                    //replace with navigate to login
-                    resetStates()
+                    if let imageData = inputImage?.jpegData(compressionQuality: 0.8) {
+                        // Upload the image first
+                        PostsService().uploadImageToCloudinary(imageData: imageData) { result in
+                            switch result {
+                            case .success(let imageUrl):
+                                // Proceed with signing up the user, using the imageUrl as the avatar
+                                let user = User(id: nil, username: username, avatar: imageUrl, email: email, password: password)
+                                let signUpSuccess = authentication.signUp(user: user)
+                                // Handle signUpSuccess accordingly
+                                if signUpSuccess {
+                                    // Reset form or navigate to another view
+                                    resetStates()
+                                }
+                            case .failure(let error):
+                                print("Failed to upload image: \(error.localizedDescription)")
+                                // Handle error accordingly
+                            }
+                        }
+                    } else {
+                        // Proceed with sign up without an image
+                        let user = User(id: nil, username: username, avatar: nil, email: email, password: password)
+                        let signUpSuccess = authentication.signUp(user: user)
+                        // Handle signUpSuccess accordingly
+                        if signUpSuccess {
+                            // Reset form or navigate to another view
+                            resetStates()
+                        }
+                    }
                 }
             }
         }
@@ -142,13 +158,17 @@ struct SignUpView: View {
     
     //delete once navigation to login is set
     func resetStates() {
-        email = "";
-        username = "";
-        password = "";
-        confirmPassword = "";
+        email = ""
+        username = ""
+        password = ""
+        confirmPassword = ""
     }
 }
 
-#Preview {
-    SignUpView()
+
+struct SignUpView_Previews: PreviewProvider {
+    static var previews: some View {
+        SignUpView()
+    }
 }
+
