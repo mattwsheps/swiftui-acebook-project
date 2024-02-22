@@ -42,7 +42,7 @@ struct FeedPageView: View {
     @State private var isShowingCommentSheet = false
     @State private var commentText = ""
     
-    @State private var token: String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjVkNDg1NGJkYTUzNGQ2ZmRmZWMxZDZmIiwiaWF0IjoxNzA4NTk3MDEyLCJleHAiOjE3MDg2NTcwMTJ9.Nfg36CVPPfP3_f8ZqTqKF-MZN77HOWKCD2q3IYUdg8c"
+    @State private var token: String = "ADD_TOKEN_HERE"
     
     
     var body: some View {
