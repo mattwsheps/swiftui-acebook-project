@@ -10,6 +10,7 @@ import PhotosUI
 
 struct PhotoPicker: UIViewControllerRepresentable {
     @Binding var image: UIImage?
+    @Binding var imageSelected: Bool
     @Environment(\.presentationMode) var presentationMode
 
     func makeUIViewController(context: Context) -> some UIViewController {
@@ -45,6 +46,7 @@ struct PhotoPicker: UIViewControllerRepresentable {
                 provider.loadObject(ofClass: UIImage.self) { image, error in
                     if let image = image as? UIImage {
                         DispatchQueue.main.async {
+                            self.parent.imageSelected = true
                             self.parent.image = image
                         }
                     }

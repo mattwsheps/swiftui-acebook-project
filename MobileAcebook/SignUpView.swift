@@ -22,6 +22,8 @@ struct SignUpView: View {
     @State private var validUsername = true
     @State private var passwordValidation = 0;
     @State private var passwordMismatch = false;
+    @State private var imageSelected = false;
+    @State private var signUpSuccessfull = false;
     
     @State private var inputImage: UIImage?
     @State private var showingImagePicker = false
@@ -30,9 +32,7 @@ struct SignUpView: View {
     private let authentication = AuthenticationService();
     
     var body: some View {
-        
-        
-        
+    
         Section (header: Text("Sign up").multilineTextAlignment(.center).bold().fixedSize().font(/*@START_MENU_TOKEN@*/.largeTitle/*@END_MENU_TOKEN@*/)){
             Form {
                 Section(header: Text("Email")){
@@ -97,10 +97,17 @@ struct SignUpView: View {
                         showingImagePicker = true
                     }
                     .sheet(isPresented: $showingImagePicker) {
-                        PhotoPicker(image: self.$inputImage)
+                        PhotoPicker(image: self.$inputImage, imageSelected: self.$imageSelected)
                     }
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: .infinity)
+                    
+                    if imageSelected {
+                        Text("Image uploaded")
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity)
+                            .listRowBackground(Color(UIColor.systemGroupedBackground))
+                    }
                     
                 }
                 
@@ -149,12 +156,12 @@ struct SignUpView: View {
                         let signUpUser = authentication.signUp(user: user)
                         
                         if signUpUser {
+                            signUpSuccessfull = true
                             resetStates()
                         }
                     }
-                    
                 }
-            }
+            }.navigate(to: WelcomePageView(), when: $signUpSuccessfull)
         }
     }
     
@@ -176,4 +183,30 @@ struct SignUpView: View {
 
 #Preview {
     SignUpView()
+}
+
+extension View {
+    /// Navigate to a new view.
+    /// - Parameters:
+    ///   - view: View to navigate to.
+    ///   - binding: Only navigates when this condition is `true`.
+    func navigate<NewView: View>(to view: NewView, when binding: Binding<Bool>) -> some View {
+        NavigationView {
+            ZStack {
+                self
+                    .navigationBarTitle("")
+                    .navigationBarHidden(true)
+
+                NavigationLink(
+                    destination: view
+                        .navigationBarTitle("")
+                        .navigationBarHidden(true),
+                    isActive: binding
+                ) {
+                    EmptyView()
+                }
+            }
+        }
+        .navigationViewStyle(.stack)
+    }
 }

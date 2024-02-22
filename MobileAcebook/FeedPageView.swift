@@ -38,6 +38,7 @@ struct FeedPageView: View {
     
     @State private var showingImagePicker = false
     @State private var inputImage: UIImage?
+    @State private var imageSelect = false
     
     @State private var isShowingCommentSheet = false
     @State private var commentText = ""
@@ -117,7 +118,7 @@ struct FeedPageView: View {
                                     
                                 }
                                 .sheet(isPresented: $showingImagePicker) {
-                                    PhotoPicker(image: self.$inputImage)
+                                    PhotoPicker(image: self.$inputImage, imageSelected: self.$imageSelect)
                                 }
                                 
                                 Spacer()
