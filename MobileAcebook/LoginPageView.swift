@@ -4,8 +4,6 @@
 //
 //  Created by James-Leigh Taylor on 21/02/2024.
 //
-import SwiftUI
-import AuthenticationServices
 
 
 //struct LoginPageView: View {
@@ -62,18 +60,19 @@ struct LoginPageView: View {
     @State private var errorMessage = "Invalid username or password"
     @State private var invalidLogin = false
     @State private var loggedIn = false
+    @State private var navigateToFeed = false
     
     var body: some View {
         
         Form {
-            Section(header: Text("Login").multilineTextAlignment(.center).bold().font(.title)) {
-                Section(header: Text("Email")) {
-                    TextField("Enter your email", text: $email).autocapitalization(/*@START_MENU_TOKEN@*/.none/*@END_MENU_TOKEN@*/)
-                }
-                Section(header: Text("Password")) {
-                    SecureField("Enter your password", text: $password).autocapitalization(/*@START_MENU_TOKEN@*/.none/*@END_MENU_TOKEN@*/)
-                }
+            
+            Section(header: Text("Email")) {
+                TextField("Enter your email", text: $email).autocapitalization(.none)
             }
+            Section(header: Text("Password")) {
+                SecureField("Enter your password", text: $password).autocapitalization(.none)
+            }
+            
             
             Section {
                 Button(action: {
@@ -82,6 +81,7 @@ struct LoginPageView: View {
                             invalidLogin = true
                         } else {
                             loggedIn = true
+                            print(loggedIn)
                         }
                     }
                 }) {
@@ -96,8 +96,10 @@ struct LoginPageView: View {
                 }
             }
         }
+        .navigate(to: FeedPageView(), when: $loggedIn) 
     }
 }
+
 
 
 
@@ -107,3 +109,28 @@ struct LoginPageView_Previews: PreviewProvider {
         }
     }
 
+extension View {
+    /// Navigate to a new view.
+    /// - Parameters:
+    ///   - view: View to navigate to.
+    ///   - binding: Only navigates when this condition is `true`.
+    func navigate<NewView: View>(to view: NewView, when binding: Binding<Bool>) -> some View {
+        NavigationView {
+            ZStack {
+                self
+                    .navigationBarTitle("")
+                    .navigationBarHidden(true)
+
+                NavigationLink(
+                    destination: view
+                        .navigationBarTitle("")
+                        .navigationBarHidden(true),
+                    isActive: binding
+                ) {
+                    EmptyView()
+                }
+            }
+        }
+        .navigationViewStyle(.stack)
+    }
+}
