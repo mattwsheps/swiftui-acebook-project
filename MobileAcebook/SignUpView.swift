@@ -23,6 +23,9 @@ struct SignUpView: View {
     @State private var passwordValidation = 0;
     @State private var passwordMismatch = false;
     
+    @State private var inputImage: UIImage?
+    @State private var showingImagePicker = false
+    
     @StateObject private var authVM = AuthenticationViewModel()
     private let authentication = AuthenticationService();
     
@@ -33,7 +36,7 @@ struct SignUpView: View {
         Section (header: Text("Sign up").multilineTextAlignment(.center).bold().fixedSize().font(/*@START_MENU_TOKEN@*/.largeTitle/*@END_MENU_TOKEN@*/)){
             Form {
                 Section(header: Text("Email")){
-                    TextField("Enter your email", text: $email)
+                    TextField("Enter your email", text: $email).autocapitalization(/*@START_MENU_TOKEN@*/.none/*@END_MENU_TOKEN@*/)
                         
                     if invalidEmailMessage {
                         Text("Email is invalid")
@@ -47,7 +50,7 @@ struct SignUpView: View {
                 
                 
                 Section(header: Text("Username")){
-                    TextField("Enter a username", text: $username)
+                    TextField("Enter a username", text: $username).autocapitalization(/*@START_MENU_TOKEN@*/.none/*@END_MENU_TOKEN@*/)
                     
                     if !validUsername {
                         Text("Please enter a username")
@@ -91,7 +94,10 @@ struct SignUpView: View {
                 
                 Section {
                     Button("Upload Profile Picture") {
-                        
+                        showingImagePicker = true
+                    }
+                    .sheet(isPresented: $showingImagePicker) {
+                        PhotoPicker(image: self.$inputImage)
                     }
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: .infinity)
@@ -122,12 +128,31 @@ struct SignUpView: View {
                         return
                     }
                     
-                    let user = User(id: nil, username: username, avatar: "placeholder.png", email: email,  password: password)
-                    authentication.signUp(user: user)
+                    if let imageData = inputImage?.jpegData(compressionQuality: 0.8) {
+                        PostsService().uploadImageToCloudinary(imageData: imageData) { result in
+                            switch result {
+                            case .success(let imageUrl):
+                                let user = User(id: nil, username: username, avatar: imageUrl, email: email,  password: password)
+                                let signUpUser = authentication.signUp(user: user)
+                                
+                                if signUpUser {
+                                    resetStates()
+                                }
+                            case .failure(let error):
+                                // Handle the error
+                                print("Image upload failed: \(error.localizedDescription)")
+                            }
+                            
+                        }
+                    } else {
+                        let user = User(id: nil, username: username, avatar: nil, email: email,  password: password)
+                        let signUpUser = authentication.signUp(user: user)
+                        
+                        if signUpUser {
+                            resetStates()
+                        }
+                    }
                     
-                    
-                    //replace with navigate to login
-                    resetStates()
                 }
             }
         }
