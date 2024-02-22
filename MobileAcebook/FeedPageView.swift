@@ -217,15 +217,12 @@ struct FeedPageView: View {
                             }
                             .frame(maxWidth: .infinity)
                             if let imageURL = URL(string: post.image) {
-                                if let imageData = try? Data(contentsOf: imageURL), let uiImage = UIImage(data: imageData) {
-                                    AsyncImage(url: imageURL) { image in
-                                        image.resizable()
-                                            .aspectRatio(contentMode: .fit)
-                                    } placeholder: {
-                                        ProgressView()
-                                    }
-                                    .frame(maxHeight: 200)
-                                }
+                                AsyncImageView(imageUrl: imageURL)
+                                            .frame(height: 200) // Set the desired frame
+                                            .padding()
+                            } else {
+                                // Fallback content if there's no image URL
+                                Text("No image available")
                             }
                             
                             Text(post.message)
