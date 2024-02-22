@@ -14,6 +14,7 @@ struct LoginResponse: Decodable {
 
 class AuthenticationService: AuthenticationServiceProtocol, ObservableObject {
     @Published var token = ""
+    @Published var loggedIn = false
     
     func signUp(user: User) -> Bool {
         guard let url = URL(string: "http://127.0.0.1:8080/users") else { return false }
@@ -67,9 +68,10 @@ class AuthenticationService: AuthenticationServiceProtocol, ObservableObject {
                     DispatchQueue.main.async {
                         self.token = response.token
                         print(self.token)
+                        self.loggedIn = true
+                        completion(true)
                     }
                     print("Login successful")
-                    completion(true)
                 }
             } else {
                 print("Login failed with status code: \(response.statusCode)")
@@ -78,48 +80,4 @@ class AuthenticationService: AuthenticationServiceProtocol, ObservableObject {
         }.resume()
     }
 }
-//        @Published var token: String = ""
-//    func login(email:String,password:String,completion:@escaping(Bool) -> Void) {
-//        
-//        
-//        guard let url = URL(string:"http://127.0.0.1:8080/tokens") else {return}
-//        var request = URLRequest(url: url)
-//        request.httpMethod = "POST"
-//        let parameters: [String: Any] = [
-//            "email": email,
-//            "password": password
-//            
-//        ]
-//        request.httpBody = try? JSONSerialization.data(withJSONObject: parameters)
-//        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-//        
-//        URLSession.shared.dataTask(with: request) { data, response, error in
-//            guard let data = data, let response = response as? HTTPURLResponse, error == nil else {
-//                //errorMessage = "Error: \(error?.localizedDescription ?? "Unknown error")"
-//                return
-//            }
-//            let token = try? JSONDecoder().decode(String.self, from: data)
-//                            DispatchQueue.main.async{
-//                                self.token = token ?? ""
-//                                print(self.token)
-//                                completion(true)
-//                            }
-//            if response.statusCode == 200 {
-//                //token = response.token
-//                //invalidLogin = false
-//                print("Login successful")
-//            } else {
-//                //invalidLogin  = true
-//                //errorMessage = "Invalid username or password"
-//                print(response)
-//            }
-//        }.resume()
-//    }
-//            
-//        }
-//   //}
-//    
-//    
-//    
-//
-//
+

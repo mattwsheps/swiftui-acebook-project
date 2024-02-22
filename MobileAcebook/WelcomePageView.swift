@@ -22,7 +22,7 @@ struct WelcomePageView: View {
                     .accessibilityIdentifier("makers-logo")
                 
                 Spacer()
-                NavigationLink(destination: SignUpView()){
+                NavigationLink(destination: LoginPageView()){
                     Text("Login")
                         .fontWeight(.bold)
                         .padding(.bottom, 25)

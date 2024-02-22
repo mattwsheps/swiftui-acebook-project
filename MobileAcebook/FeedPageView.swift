@@ -34,7 +34,7 @@ extension Date {
 
 struct FeedPageView: View {
     @ObservedObject var postsService = PostsService()
-    @ObservedObject var authenticationService = AuthenticationService()
+    @ObservedObject var authService: AuthenticationService
     @State private var newPostMessage: String = ""
     @State private var newPostImageURL: String = ""
     
@@ -44,12 +44,8 @@ struct FeedPageView: View {
     @State private var isShowingCommentSheet = false
     @State private var commentText = ""
     
-<<<<<<< HEAD
     @State private var token: String = ""
-=======
-    @State private var token: String = "ADD_YOUR_TOKEN_HERE"
-    
->>>>>>> main
+
     
     var body: some View {
         ZStack{
@@ -83,12 +79,12 @@ struct FeedPageView: View {
                             }
                         } else {
                             Color.gray
-                                .frame(width: 50, height: 50)
+                                .frame(width: 80, height: 80)
                                 .clipShape(Circle())
                                 .overlay(
                                     Image(systemName: "person.fill")
                                         .resizable()
-                                        .frame(width: 30, height: 30)
+                                        .frame(width: 45, height: 45)
                                         .aspectRatio(contentMode: .fill)
                                         .foregroundColor(.white)
                                 )
@@ -290,7 +286,8 @@ struct FeedPageView: View {
                 
             }
             .onAppear(){
-                token = authenticationService.token
+                token = authService.token
+                print("token =", authService.token)
                 postsService.getPosts(token: token)
             }
         }
@@ -359,13 +356,11 @@ struct FeedPageView: View {
 }
 
 
-
-
-struct FeedPageView_Previews: PreviewProvider {
-    static var previews: some View {
-        FeedPageView()
-    }
-}
+//struct FeedPageView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        FeedPageView(authService: authService)
+//    }
+//}
 
 struct CommentSheetView: View {
     @Binding var commentText: String
