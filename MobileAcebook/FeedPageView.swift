@@ -42,7 +42,9 @@ struct FeedPageView: View {
     @State private var isShowingCommentSheet = false
     @State private var commentText = ""
     
-    @State private var token: String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjVkNDg1NGJkYTUzNGQ2ZmRmZWMxZDZmIiwiaWF0IjoxNzA4NTk3MDEyLCJleHAiOjE3MDg2NTcwMTJ9.Nfg36CVPPfP3_f8ZqTqKF-MZN77HOWKCD2q3IYUdg8c"
+    // login token
+    @State private var token: String = "LOGIN TOKEN HERE"
+    @State private var isLoggedOut = false
     
     
     var body: some View {
@@ -96,7 +98,7 @@ struct FeedPageView: View {
                                 .multilineTextAlignment(.leading)
                                 .keyboardType(.default)
                                 .autocapitalization(.none)
-
+                            
                             
                             HStack{
                                 Button(action: {
@@ -164,7 +166,7 @@ struct FeedPageView: View {
                     Text("Recent")
                         .font(.title)
                         .fontWeight(.bold)
-                     
+                    
                     
                     ForEach(postsService.posts) { post in
                         
@@ -278,11 +280,28 @@ struct FeedPageView: View {
                     }
                 }
                 .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20))
-                
             }
             .onAppear(){
                 postsService.getPosts(token: token)
             }
+            // logout button
+            Group{
+                HStack{
+                    Button(action: {
+                        // set token to empty string and set loggedout state to true
+                        self.token = ""
+                        self.isLoggedOut = true
+                    }, label:{
+                        Text("Logout")
+                            .foregroundColor(.red)
+                    }).padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 15))
+                        .background(Color.white)
+                        .cornerRadius(30)
+                }
+            // if loggedout == true show the welcome page view
+            }.frame(maxHeight: .infinity, alignment: .bottom)
+                .fullScreenCover(isPresented: $isLoggedOut, content: {WelcomePageView()}
+                )
         }
     }
     // Function to load an image

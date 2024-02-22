@@ -18,19 +18,21 @@ struct SignUpView: View {
     
     @State private var invalidEmailMessage = false
     @State private var validUsername = true
-    @State private var passwordValidation = 0
-    @State private var passwordMismatch = false
-    @State private var showingImagePicker = false
+    @State private var passwordValidation = 0;
+    @State private var passwordMismatch = false;
+    
     @State private var inputImage: UIImage?
+    @State private var showingImagePicker = false
+    
     @StateObject private var authVM = AuthenticationViewModel()
     private let authentication = AuthenticationService()
     
     var body: some View {
         Section(header: Text("Sign up").multilineTextAlignment(.center).bold().fixedSize().font(.largeTitle)) {
             Form {
-                Section(header: Text("Email")) {
-                    TextField("Enter your email", text: $email)
-                    
+                Section(header: Text("Email")){
+                    TextField("Enter your email", text: $email).autocapitalization(/*@START_MENU_TOKEN@*/.none/*@END_MENU_TOKEN@*/)
+                        
                     if invalidEmailMessage {
                         Text("Email is invalid")
                             .foregroundColor(Color.red)
@@ -40,8 +42,8 @@ struct SignUpView: View {
                     }
                 }
                 
-                Section(header: Text("Username")) {
-                    TextField("Enter a username", text: $username)
+                Section(header: Text("Username")){
+                    TextField("Enter a username", text: $username).autocapitalization(/*@START_MENU_TOKEN@*/.none/*@END_MENU_TOKEN@*/)
                     
                     if !validUsername {
                         Text("Please enter a username")
@@ -117,33 +119,30 @@ struct SignUpView: View {
                     }
                     
                     if let imageData = inputImage?.jpegData(compressionQuality: 0.8) {
-                        // Upload the image first
                         PostsService().uploadImageToCloudinary(imageData: imageData) { result in
                             switch result {
                             case .success(let imageUrl):
-                                // Proceed with signing up the user, using the imageUrl as the avatar
-                                let user = User(id: nil, username: username, avatar: imageUrl, email: email, password: password)
-                                let signUpSuccess = authentication.signUp(user: user)
-                                // Handle signUpSuccess accordingly
-                                if signUpSuccess {
-                                    // Reset form or navigate to another view
+                                let user = User(id: nil, username: username, avatar: imageUrl, email: email,  password: password)
+                                let signUpUser = authentication.signUp(user: user)
+                                
+                                if signUpUser {
                                     resetStates()
                                 }
                             case .failure(let error):
-                                print("Failed to upload image: \(error.localizedDescription)")
-                                // Handle error accordingly
+                                // Handle the error
+                                print("Image upload failed: \(error.localizedDescription)")
                             }
+                            
                         }
                     } else {
-                        // Proceed with sign up without an image
-                        let user = User(id: nil, username: username, avatar: nil, email: email, password: password)
-                        let signUpSuccess = authentication.signUp(user: user)
-                        // Handle signUpSuccess accordingly
-                        if signUpSuccess {
-                            // Reset form or navigate to another view
+                        let user = User(id: nil, username: username, avatar: nil, email: email,  password: password)
+                        let signUpUser = authentication.signUp(user: user)
+                        
+                        if signUpUser {
                             resetStates()
                         }
                     }
+                    
                 }
             }
         }
