@@ -18,19 +18,23 @@ struct SignUpView: View {
     
     @State private var invalidEmailMessage = false
     @State private var validUsername = true
+
     @State private var passwordValidation = 0
     @State private var passwordMismatch = false
     @State private var showingImagePicker = false
     @State private var inputImage: UIImage?
+
     @StateObject private var authVM = AuthenticationViewModel()
     private let authentication = AuthenticationService()
     
     var body: some View {
         Section(header: Text("Sign up").multilineTextAlignment(.center).bold().fixedSize().font(.largeTitle)) {
             Form {
-                Section(header: Text("Email")) {
-                    TextField("Enter your email", text: $email)
-                    
+
+                Section(header: Text("Email")){
+                    TextField("Enter your email", text: $email).autocapitalization(/*@START_MENU_TOKEN@*/.none/*@END_MENU_TOKEN@*/)
+                        
+
                     if invalidEmailMessage {
                         Text("Email is invalid")
                             .foregroundColor(Color.red)
@@ -40,8 +44,11 @@ struct SignUpView: View {
                     }
                 }
                 
-                Section(header: Text("Username")) {
-                    TextField("Enter a username", text: $username)
+   
+                
+                Section(header: Text("Username")){
+                    TextField("Enter a username", text: $username).autocapitalization(/*@START_MENU_TOKEN@*/.none/*@END_MENU_TOKEN@*/)
+
                     
                     if !validUsername {
                         Text("Please enter a username")
@@ -117,6 +124,7 @@ struct SignUpView: View {
                     }
                     
                     if let imageData = inputImage?.jpegData(compressionQuality: 0.8) {
+
                         // Upload the image first
                         PostsService().uploadImageToCloudinary(imageData: imageData) { result in
                             switch result {
@@ -144,6 +152,7 @@ struct SignUpView: View {
                             resetStates()
                         }
                     }
+
                 }
             }
         }
