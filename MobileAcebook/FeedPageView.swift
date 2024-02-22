@@ -8,6 +8,7 @@
 import SwiftUI
 import PhotosUI
 
+
 extension Date {
     func timeAgo() -> String {
         let calendar = Calendar.current
@@ -33,6 +34,7 @@ extension Date {
 
 struct FeedPageView: View {
     @ObservedObject var postsService = PostsService()
+    @ObservedObject var authService: AuthenticationService
     @State private var newPostMessage: String = ""
     @State private var newPostImageURL: String = ""
     
@@ -43,8 +45,9 @@ struct FeedPageView: View {
     @State private var isShowingCommentSheet = false
     @State private var commentText = ""
     
-    @State private var token: String = "ADD_YOUR_TOKEN_HERE"
-    
+    @State private var token: String = ""
+    @State private var isLoggedOut: Bool = false
+
     
     var body: some View {
         ZStack{
@@ -78,12 +81,12 @@ struct FeedPageView: View {
                             }
                         } else {
                             Color.gray
-                                .frame(width: 50, height: 50)
+                                .frame(width: 80, height: 80)
                                 .clipShape(Circle())
                                 .overlay(
                                     Image(systemName: "person.fill")
                                         .resizable()
-                                        .frame(width: 30, height: 30)
+                                        .frame(width: 45, height: 45)
                                         .aspectRatio(contentMode: .fill)
                                         .foregroundColor(.white)
                                 )
@@ -97,7 +100,7 @@ struct FeedPageView: View {
                                 .multilineTextAlignment(.leading)
                                 .keyboardType(.default)
                                 .autocapitalization(.none)
-
+                            
                             
                             HStack{
                                 Button(action: {
@@ -165,7 +168,7 @@ struct FeedPageView: View {
                     Text("Recent")
                         .font(.title)
                         .fontWeight(.bold)
-                     
+                    
                     
                     ForEach(postsService.posts) { post in
                         
@@ -216,15 +219,12 @@ struct FeedPageView: View {
                             }
                             .frame(maxWidth: .infinity)
                             if let imageURL = URL(string: post.image) {
-                                if let imageData = try? Data(contentsOf: imageURL), let uiImage = UIImage(data: imageData) {
-                                    AsyncImage(url: imageURL) { image in
-                                        image.resizable()
-                                            .aspectRatio(contentMode: .fit)
-                                    } placeholder: {
-                                        ProgressView()
-                                    }
-                                    .frame(maxHeight: 200)
-                                }
+                                AsyncImageView(imageUrl: imageURL)
+                                            .frame(height: 200) // Set the desired frame
+                                            .padding()
+                            } else {
+                                // Fallback content if there's no image URL
+                                Text("No image available")
                             }
                             
                             Text(post.message)
@@ -282,11 +282,30 @@ struct FeedPageView: View {
                     }
                 }
                 .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20))
-                
             }
             .onAppear(){
+                token = authService.token
+                print("token =", authService.token)
                 postsService.getPosts(token: token)
             }
+            // logout button
+            Group{
+                HStack{
+                    Button(action: {
+                        // set token to empty string and set loggedout state to true
+                        self.token = ""
+                        self.isLoggedOut = true
+                    }, label:{
+                        Text("Logout")
+                            .foregroundColor(.red)
+                    }).padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 15))
+                        .background(Color.white)
+                        .cornerRadius(30)
+                }
+            // if loggedout == true show the welcome page view
+            }.frame(maxHeight: .infinity, alignment: .bottom)
+                .fullScreenCover(isPresented: $isLoggedOut, content: {WelcomePageView()}
+                )
         }
     }
     // Function to load an image
@@ -352,12 +371,11 @@ struct FeedPageView: View {
     }
 }
 
-
-
-
 struct FeedPageView_Previews: PreviewProvider {
     static var previews: some View {
-        FeedPageView()
+        let mockAuthService = AuthenticationService()
+        mockAuthService.token = "your_desired_token_value"
+        return FeedPageView(authService: mockAuthService)
     }
 }
 
