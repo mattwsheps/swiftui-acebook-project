@@ -8,7 +8,7 @@
 public struct User: Codable {
     let id: String?
     let username: String
-    let avatar: String
+    let avatar: String?
     let email: String
     let password: String
     

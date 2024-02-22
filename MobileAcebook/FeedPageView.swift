@@ -98,7 +98,7 @@ struct FeedPageView: View {
                                 .multilineTextAlignment(.leading)
                                 .keyboardType(.default)
                                 .autocapitalization(.none)
-
+                            
                             
                             HStack{
                                 Button(action: {
@@ -166,7 +166,7 @@ struct FeedPageView: View {
                     Text("Recent")
                         .font(.title)
                         .fontWeight(.bold)
-                     
+                    
                     
                     ForEach(postsService.posts) { post in
                         
@@ -283,13 +283,30 @@ struct FeedPageView: View {
                     }
                 }
                 .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20))
-                
             }
             .onAppear(){
                 token = authService.token
                 print("token =", authService.token)
                 postsService.getPosts(token: token)
             }
+            // logout button
+            Group{
+                HStack{
+                    Button(action: {
+                        // set token to empty string and set loggedout state to true
+                        self.token = ""
+                        self.isLoggedOut = true
+                    }, label:{
+                        Text("Logout")
+                            .foregroundColor(.red)
+                    }).padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 15))
+                        .background(Color.white)
+                        .cornerRadius(30)
+                }
+            // if loggedout == true show the welcome page view
+            }.frame(maxHeight: .infinity, alignment: .bottom)
+                .fullScreenCover(isPresented: $isLoggedOut, content: {WelcomePageView()}
+                )
         }
     }
     // Function to load an image
