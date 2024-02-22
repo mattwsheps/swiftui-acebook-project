@@ -45,6 +45,7 @@ struct FeedPageView: View {
     @State private var commentText = ""
     
     @State private var token: String = ""
+    @State private var isLoggedOut: Bool = false
 
     
     var body: some View {
