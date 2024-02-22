@@ -132,6 +132,64 @@ class PostsService: PostsServiceProtocol, ObservableObject {
                 }
             }.resume()
         }
+    func uploadImageToCloudinary(imageData: Data, completion: @escaping (Result<String, Error>) -> Void) {
+            let cloudName = "dououppib" // Make sure this is your correct Cloudinary cloud name
+            let uploadPreset = "NEW_PRESET" // Replace with your actual unsigned upload preset
+
+            let url = URL(string: "https://api.cloudinary.com/v1_1/\(cloudName)/image/upload")!
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+
+            // Setting content type to JSON for the request
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+            let body: [String: Any] = [
+                "file": "data:image/jpeg;base64,\(imageData.base64EncodedString())",
+                "upload_preset": uploadPreset
+            ]
+
+            request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
+
+            URLSession.shared.dataTask(with: request) { data, response, error in
+                guard let data = data, error == nil else {
+                    print("Networking error: \(error?.localizedDescription ?? "Unknown error")")
+                    completion(.failure(error ?? URLError(.badServerResponse)))
+                    return
+                }
+
+                // Attempt to print the whole response body for debugging
+                if let responseString = String(data: data, encoding: .utf8) {
+                    print("Full response body: \(responseString)")
+                }
+
+                if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
+                    print("HTTP Response Status Code: \(httpResponse.statusCode)")
+                    completion(.failure(URLError(.badServerResponse)))
+                    return
+                }
+
+                do {
+                    if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                        // Checking and printing the entire JSON response for debugging
+                        print("JSON Response: \(jsonResponse)")
+
+                        if let imageUrl = jsonResponse["secure_url"] as? String {
+                            completion(.success(imageUrl))
+                        } else {
+                            print("Error: 'secure_url' not found in response. Full JSON: \(jsonResponse)")
+                            completion(.failure(URLError(.cannotParseResponse)))
+                        }
+                    } else {
+                        print("Failed to decode JSON. Full response: \(String(data: data, encoding: .utf8) ?? "Invalid response data")")
+                        completion(.failure(URLError(.cannotParseResponse)))
+                    }
+                } catch {
+                    print("JSON Decoding Error: \(error)")
+                    completion(.failure(error))
+                }
+            }.resume()
+        }
+
     func likePost(token: String, postID: String, completion: @escaping (Int?) -> Void) {
         guard let url = URL(string: "\(baseUrlString)/posts/\(postID)/like") else { return }
         
