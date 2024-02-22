@@ -355,12 +355,13 @@ struct FeedPageView: View {
     }
 }
 
-
-//struct FeedPageView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        FeedPageView(authService: authService)
-//    }
-//}
+struct FeedPageView_Previews: PreviewProvider {
+    static var previews: some View {
+        let mockAuthService = AuthenticationService()
+        mockAuthService.token = "your_desired_token_value"
+        return FeedPageView(authService: mockAuthService)
+    }
+}
 
 struct CommentSheetView: View {
     @Binding var commentText: String
