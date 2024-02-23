@@ -117,7 +117,7 @@ struct FeedPageView: View {
                                         .cornerRadius(30)
                                     }
                                     .sheet(isPresented: $showingImagePicker) {
-                                        PhotoPicker(image: self.$inputImage)
+                                        PhotoPicker(image: self.$inputImage, imageSelected: $imageSelect)
                                     }
                                     
                                     Spacer()
@@ -328,7 +328,7 @@ struct FeedPageView: View {
             }
             .frame(maxHeight: .infinity, alignment: .bottom)
             .fullScreenCover(isPresented: $isLoggedOut, content: {
-                WelcomePageView()
+                LoginPageView()
             })
         }
     }
