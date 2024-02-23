@@ -1,23 +1,21 @@
 //
-//  Post.swift
+//  Comment.swift
 //  MobileAcebook
 //
-//  Created by Matthew Shepherd on 19/02/2024.
+//  Created by Matthew Shepherd on 23/02/2024.
 //
 
 import SwiftUI
 
-public struct Post: Codable, Identifiable, Equatable {
+public struct Comment: Codable, Identifiable {
     public let id: String
     var message: String
-    var image: String
     var createdBy: String?
     var createdByUsername: String?
     var createdByAvatar: String?
     let createdAtString: String // Keep createdAt as a String type
     var likes: [String]
     var likesCount: Int?
-    let comments: Int
     
     // Convert createdAtString to a Date object
     public var createdAt: Date {
@@ -26,15 +24,9 @@ public struct Post: Codable, Identifiable, Equatable {
         return formatter.date(from: createdAtString) ?? Date()
     }
     
-    // Implement Equatable protocol
-        public static func == (lhs: Post, rhs: Post) -> Bool {
-            return lhs.id == rhs.id
-        }
-    
     enum CodingKeys: String, CodingKey {
         case id = "_id"
-        case message, image, createdBy, createdAtString = "createdAt" // Map createdAtString to createdAt
-        case likes, comments
+        case message, createdBy, createdAtString = "createdAt" // Map createdAtString to createdAt
+        case likes
     }
 }
-
