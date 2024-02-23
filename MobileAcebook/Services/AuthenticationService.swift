@@ -15,9 +15,10 @@ struct LoginResponse: Decodable {
 class AuthenticationService: AuthenticationServiceProtocol, ObservableObject {
     @Published var token = ""
     @Published var loggedIn = false
+    @State var emailAvaliable = true
     
-    func signUp(user: User) -> Bool {
-        guard let url = URL(string: "http://127.0.0.1:8080/users") else { return false }
+    func signUp(user: User, completion: @escaping (Bool) -> Void) {
+        guard let url = URL(string: "http://127.0.0.1:8080/users") else { return }
         var request = URLRequest(url:url)
         let payload = ["email": user.email, "username": user.username, "password": user.password, "avatar": user.avatar]
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -28,21 +29,29 @@ class AuthenticationService: AuthenticationServiceProtocol, ObservableObject {
             request.httpBody = jsonData
         } catch {
             print("Error encoding JSON: \(error)")
-            return false
+            completion(false)
         }
         
-        let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        URLSession.shared.dataTask(with: request) { (data, response, error) in
+            
+            if let response = response as? HTTPURLResponse {
+                if response.statusCode == 409 {
+                    completion(false)
+                }
+            }
+            
             guard let data = data, error == nil else {
                 if let error = error {
                     print("Error: \(error)")
                 }
-                print(response as Any)
                 return
             }
-        }
-        task.resume()
-        return true // placeholder
-    }
+        completion(true)
+        }.resume()
+        
+    
+    
+}
     
     
     func login(email: String, password: String, completion: @escaping (Bool) -> Void) {
@@ -80,4 +89,5 @@ class AuthenticationService: AuthenticationServiceProtocol, ObservableObject {
         }.resume()
     }
 }
+
 

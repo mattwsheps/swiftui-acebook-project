@@ -36,6 +36,8 @@ struct FeedPageView: View {
     @State private var newPostMessage: String = ""
     @State private var showingImagePicker = false
     @State private var inputImage: UIImage?
+    @State private var imageSelect = false
+    
     @State private var isShowingCommentSheet = false
 
     @State private var commentText = ""
@@ -115,7 +117,7 @@ struct FeedPageView: View {
                                         .cornerRadius(30)
                                     }
                                     .sheet(isPresented: $showingImagePicker) {
-                                        PhotoPicker(image: self.$inputImage)
+                                        PhotoPicker(image: self.$inputImage, imageSelected: $imageSelect)
                                     }
                                     
                                     Spacer()
@@ -326,7 +328,7 @@ struct FeedPageView: View {
             }
             .frame(maxHeight: .infinity, alignment: .bottom)
             .fullScreenCover(isPresented: $isLoggedOut, content: {
-                WelcomePageView()
+                LoginPageView()
             })
         }
     }
