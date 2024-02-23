@@ -8,12 +8,10 @@
 import SwiftUI
 import PhotosUI
 
-
 extension Date {
     func timeAgo() -> String {
         let calendar = Calendar.current
         let now = Date()
-        
         let components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: self, to: now)
         
         if let years = components.year, years > 0 {
@@ -36,31 +34,26 @@ struct FeedPageView: View {
     @ObservedObject var postsService = PostsService()
     @ObservedObject var authService: AuthenticationService
     @State private var newPostMessage: String = ""
-    @State private var newPostImageURL: String = ""
-    
     @State private var showingImagePicker = false
     @State private var inputImage: UIImage?
-    
     @State private var isShowingCommentSheet = false
+
     @State private var commentText = ""
     @State private var postId = ""
     @State private var selectedPostIndex: Int = 0
     
+
     @State private var token: String = ""
     @State private var isLoggedOut: Bool = false
 
-    
     var body: some View {
-        ZStack{
-            Color(red: 242/255, green: 242/255, blue: 247/255)
-                .edgesIgnoringSafeArea(.all)
-            
-            ScrollView{
-                VStack(alignment: .leading, spacing: 20){
-                    Text("Feed")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                    HStack(spacing: 10){
+        ZStack {
+            Color(red: 242/255, green: 242/255, blue: 247/255).edgesIgnoringSafeArea(.all)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    Text("Feed").font(.largeTitle).fontWeight(.bold)
+                    // Avatar and post input area
+                    HStack(spacing: 10) {
                         if let avatarURLString = postsService.user?.avatar, let avatarURL = URL(string: avatarURLString) {
                             AsyncImage(url: avatarURL) { image in
                                 image
@@ -102,78 +95,88 @@ struct FeedPageView: View {
                                 .keyboardType(.default)
                                 .autocapitalization(.none)
                             
-                            
-                            HStack{
-                                Button(action: {
-                                    print("Select Image button was tapped.")
-                                    showingImagePicker = true
-                                }) {
-                                    HStack{
-                                        Image("photo-icon")
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fit)
-                                            .frame(width: 20, height: 20)
-                                        Text("Image")
-                                            .foregroundColor(.gray)
+                            // Image picker and Post button area
+                            VStack(alignment: .center, spacing: 10) {
+                                // Image picker and Post button
+                                HStack {
+                                    Button(action: {
+                                        showingImagePicker = true
+                                    }) {
+                                        HStack {
+                                            Image(systemName: "photo.on.rectangle") // This assumes you are using SF Symbols
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fit)
+                                                .frame(width: 20, height: 20)
+                                            Text("Image")
+                                                .foregroundColor(.gray)
+                                        }
+                                        .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 15))
+                                        .background(Color.white)
+                                        .cornerRadius(30)
                                     }
-                                    .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 15))
-                                    .background(Color.white)
-                                    .cornerRadius(30)
+                                    .sheet(isPresented: $showingImagePicker) {
+                                        PhotoPicker(image: self.$inputImage)
+                                    }
                                     
-                                }
-                                .sheet(isPresented: $showingImagePicker) {
-                                    PhotoPicker(image: self.$inputImage)
-                                }
-                                
-                                Spacer()
-                                
-                                Button(action: {
-                                    print("Post button was tapped.")
-                                    if let inputImage = inputImage {
-                                        print("An image is selected for posting.")
-                                        uploadImageAndCreatePost(image: inputImage)
-                                    } else {
-                                        print("No image is selected, creating a text-only post.")
-                                        createPost(with: nil)
+                                    Spacer()
+                                    
+                                    Button(action: {
+                                        if let inputImage = inputImage {
+                                            uploadImageAndCreatePost(image: inputImage)
+                                        } else {
+                                            createPost(with: nil)
+                                        }
+                                    }) {
+                                        HStack {
+                                            Text("Post")
+                                                .foregroundColor(.gray)
+                                            Image(systemName: "paperplane.fill")
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fit)
+                                                .frame(width: 20, height: 20)
+                                        }
+                                        .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 15))
+                                        .background(Color.white)
+                                        .cornerRadius(30)
                                     }
-                                }) {
-                                    HStack{
-                                        Text("Post")
-                                            .foregroundColor(.gray)
-                                        Image(systemName: "paperplane.fill")
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fit)
-                                            .frame(width: 20, height: 20)
-                                    }
-                                    .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 15))
-                                    .background(Color.white)
-                                    .cornerRadius(30)
+                                    .disabled(newPostMessage.isEmpty)
                                 }
-                                .disabled(newPostMessage.isEmpty)
+
+                                // Image preview and Remove button
+                                if let inputImage = inputImage {
+                                    Image(uiImage: inputImage)
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(height: 200)
+                                        .padding()
+                                    
+                                    Button(action: {
+                                        self.inputImage = nil
+                                    }) {
+                                        HStack {
+                                            Text("Remove")
+                                                .foregroundColor(.red)
+                                            Image(systemName: "xmark.circle.fill")
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fit)
+                                                .frame(width: 20, height: 20)
+                                        }
+                                        .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 15))
+                                        .background(Color.white)
+                                        .cornerRadius(30)
+                                    }
+                                }
                             }
-                            
-                        }
-                        
-                    }
-                    VStack(alignment: .center){
-                        if let inputImage = inputImage {
-                            Image(uiImage: inputImage)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 200)
-                                .padding()
+                            .padding(.bottom)
                         }
                     }
                     
-                    
-                    Text("Recent")
-                        .font(.title)
-                        .fontWeight(.bold)
-                    
-                    
+                    // Recent posts list
                     ForEach(postsService.posts) { post in
+
                         
                         VStack(alignment: .leading, spacing: 10) {
+
                             HStack{
                                 if let avatarURLString = post.createdByAvatar, let avatarURL = URL(string: avatarURLString) {
                                     AsyncImage(url: avatarURL) { image in
@@ -221,8 +224,10 @@ struct FeedPageView: View {
                             .frame(maxWidth: .infinity)
                             if let imageURL = URL(string: post.image) {
                                 AsyncImageView(imageUrl: imageURL)
+
 //                                            .frame(height: 200) // Set the desired frame
                                     .cornerRadius(10)
+
                             } else {
                                 // Fallback content if there's no image URL
                                 Text("No image available")
@@ -235,12 +240,9 @@ struct FeedPageView: View {
                             HStack{
                                 Button(action: {
                                     postsService.likePost(token: token, postID: post.id) { likesCount in
-                                        // Handle the response if needed, such as updating UI based on likesCount
                                         if let likesCount = likesCount {
-                                            // Update UI or perform actions based on the likesCount
                                             print("Likes count: \(likesCount)")
                                         } else {
-                                            // Handle error or nil response if needed
                                             print("Failed to like the post.")
                                         }
                                         toggleLike(for: post.id)
@@ -262,6 +264,7 @@ struct FeedPageView: View {
                                     .foregroundColor(.gray)
                                 
                                 Button(action: {
+
                                     // Show the comment sheet
                                     if let index = postsService.posts.firstIndex(of: post) {
                                         // Set the selected post index
@@ -270,14 +273,17 @@ struct FeedPageView: View {
                                         // Show the comment sheet
                                         isShowingCommentSheet.toggle()
                                     }
+
                                 }) {
                                     Image("comment-icon")
                                         .resizable()
                                         .frame(width: 25, height: 25)
                                 }
                                 .sheet(isPresented: $isShowingCommentSheet) {
+
                                     // Content of the comment sheet
                                     CommentSheetView(postsService: postsService, commentText: $commentText, postId: $postId, selectedPostIndex: $selectedPostIndex, token: $token)
+
                                 }
                             }
                             .padding(EdgeInsets(top: 5, leading: 10, bottom: 5, trailing: 10))
@@ -288,31 +294,30 @@ struct FeedPageView: View {
                         .cornerRadius(50)
                     }
                 }
-                .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20))
+                .padding(.all, 20)
             }
-            .onAppear(){
+            .onAppear {
                 token = authService.token
-                print("token =", authService.token)
                 postsService.getPosts(token: token)
             }
-            // logout button
-            Group{
-                HStack{
-                    Button(action: {
-                        // set token to empty string and set loggedout state to true
-                        self.token = ""
-                        self.isLoggedOut = true
-                    }, label:{
-                        Text("Logout")
-                            .foregroundColor(.red)
-                    }).padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 15))
-                        .background(Color.white)
-                        .cornerRadius(30)
-                }
-            // if loggedout == true show the welcome page view
-            }.frame(maxHeight: .infinity, alignment: .bottom)
-                .fullScreenCover(isPresented: $isLoggedOut, content: {WelcomePageView()}
-                )
+            
+            // Logout button area
+            HStack {
+                Button(action: {
+                    self.token = ""
+                    self.isLoggedOut = true
+                }, label:{
+                    Text("Logout")
+                        .foregroundColor(.red)
+                })
+                .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 15))
+                .background(Color.white)
+                .cornerRadius(30)
+            }
+            .frame(maxHeight: .infinity, alignment: .bottom)
+            .fullScreenCover(isPresented: $isLoggedOut, content: {
+                WelcomePageView()
+            })
         }
     }
     // Function to load an image
@@ -381,7 +386,7 @@ struct FeedPageView: View {
 struct FeedPageView_Previews: PreviewProvider {
     static var previews: some View {
         let mockAuthService = AuthenticationService()
-        mockAuthService.token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjVkNWU0Njg0ZjE0YTNhYmRkNTA3MjY1IiwiaWF0IjoxNzA4NjkxODQ1LCJleHAiOjE3MDg2OTU0NDV9._KlxlYgTAbl-byYz7ypYgIVWE0SwtivTtpi82X9Zz7o"
+        mockAuthService.token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjVkNWU0Njg0ZjE0YTNhYmRkNTA3MjY1IiwiaWF0IjoxNzA4Njk2NzEyLCJleHAiOjE3MDg3MDAzMTJ9.INn6HHDSrt0OwKGfzmV6Z2Q6VoHsX8OyKGWsuU0LeVg"
         return FeedPageView(authService: mockAuthService)
     }
 }
