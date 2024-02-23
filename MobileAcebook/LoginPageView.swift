@@ -6,7 +6,7 @@ struct LoginPageView: View {
     @State private var password = ""
     @State private var errorMessage = "Invalid username or password"
     @State private var invalidLogin = false
-    @State private var navigateToFeed = false
+    @State private var navigateToSignUp = false
     
     var body: some View {
         ZStack {
@@ -81,13 +81,27 @@ struct LoginPageView: View {
                             .padding(.top)
                     }
                     
+                    HStack(spacing: 6){
+                        Text("Don't have an account?")
+                            .font(.headline)
+                            .padding(.top)
+                        Button(action:{
+                            navigateToSignUp = true
+                        }){
+                            Text("Sign up")
+                                .font(.headline)
+                                .padding(.top)
+                        }
+                    }
                 }
-                .padding(.bottom, 100)
+                .padding(.bottom, 80)
             }
         }
-        .navigate(to: FeedPageView(authService: authService), when: $authService.loggedIn)
+        .navigate(to: SignUpView(), when: $navigateToSignUp)
+        .navigate(to: FeedPageView(authService: authService).navigationBarBackButtonHidden(true), when: $authService.loggedIn)
     }
 }
+   
 
 
 
