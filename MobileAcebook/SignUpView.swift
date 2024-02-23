@@ -39,7 +39,7 @@ struct SignUpView: View {
             
             
             VStack(spacing: 20) {
-                Text("Sign up").multilineTextAlignment(.center).bold().fixedSize().font(.largeTitle)
+                Text("Sign Up").multilineTextAlignment(.center).bold().fixedSize().font(.largeTitle)
                     .padding(.bottom)
                 
                 HStack{
@@ -150,10 +150,16 @@ struct SignUpView: View {
                         .frame(maxWidth: .infinity)
                         .listRowBackground(Color(UIColor.systemGroupedBackground))
                 }
-                
-                
-                Button("Upload Profile Picture") {
-                    showingImagePicker = true
+          
+                Button(action: {showingImagePicker = true}) {
+                    HStack {
+                        Image(systemName: "photo.on.rectangle") // This assumes you are using SF Symbols
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 20, height: 20)
+                        Text("Upload Profile Picture")
+                            .fontWeight(.semibold)
+                    }
                 }
                 .sheet(isPresented: $showingImagePicker) {
                     PhotoPicker(image: self.$inputImage, imageSelected: self.$imageSelected)
@@ -161,8 +167,7 @@ struct SignUpView: View {
                 .multilineTextAlignment(.center)
                 .padding(EdgeInsets(top: 15, leading: 30, bottom: 15, trailing: 30))
                 .fontWeight(.semibold)
-                .background(Color.blue)
-                .foregroundColor(.white)
+                .background(Color.white)
                 .cornerRadius(30)
                 .padding(.horizontal)
                 
