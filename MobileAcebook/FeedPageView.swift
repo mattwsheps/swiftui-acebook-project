@@ -53,7 +53,7 @@ struct FeedPageView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     Text("Feed").font(.largeTitle).fontWeight(.bold)
                     // Avatar and post input area
-                    HStack(spacing: 10) {
+                    HStack(alignment: .top, spacing: 10) {
                         if let avatarURLString = postsService.user?.avatar, let avatarURL = URL(string: avatarURLString) {
                             AsyncImage(url: avatarURL) { image in
                                 image
@@ -142,34 +142,46 @@ struct FeedPageView: View {
                                     .disabled(newPostMessage.isEmpty)
                                 }
 
-                                // Image preview and Remove button
-                                if let inputImage = inputImage {
-                                    Image(uiImage: inputImage)
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(height: 200)
-                                        .padding()
-                                    
-                                    Button(action: {
-                                        self.inputImage = nil
-                                    }) {
-                                        HStack {
-                                            Text("Remove")
-                                                .foregroundColor(.red)
-                                            Image(systemName: "xmark.circle.fill")
-                                                .resizable()
-                                                .aspectRatio(contentMode: .fit)
-                                                .frame(width: 20, height: 20)
-                                        }
-                                        .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 15))
-                                        .background(Color.white)
-                                        .cornerRadius(30)
-                                    }
-                                }
+                                
                             }
-                            .padding(.bottom)
+                   
                         }
                     }
+                    
+                    // Image preview and Remove button
+                    if let inputImage = inputImage {
+                        VStack(alignment: .center, spacing: 15){
+                            VStack{
+                                Image(uiImage: inputImage)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .cornerRadius(30)
+                              
+                            }
+                            .padding(EdgeInsets(top: 20, leading: 20, bottom: 20, trailing: 20))
+                            .frame(maxWidth: .infinity)
+                            .background(Color.white)
+                            .cornerRadius(50)
+                            
+                            Button(action: {
+                                self.inputImage = nil
+                            })
+                            {
+                                HStack {
+                                    Text("Remove")
+                                        .foregroundColor(.red)
+                                    Image(systemName: "xmark.circle.fill")
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(width: 20, height: 20)
+                                }
+                                .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 15))
+                                .background(Color.white)
+                                .cornerRadius(30)
+                            }
+                        }
+                    }
+                    
                     
                     // Recent posts list
                     ForEach(postsService.posts) { post in
@@ -224,8 +236,6 @@ struct FeedPageView: View {
                             .frame(maxWidth: .infinity)
                             if let imageURL = URL(string: post.image) {
                                 AsyncImageView(imageUrl: imageURL)
-
-//                                            .frame(height: 200) // Set the desired frame
                                     .cornerRadius(10)
 
                             } else {
