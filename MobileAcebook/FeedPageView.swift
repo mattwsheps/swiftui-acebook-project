@@ -401,7 +401,7 @@ struct CommentSheetView: View {
             
             
             ScrollView{
-                VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: 10) {
                     VStack(alignment: .leading, spacing: 10) {
                         HStack{
                             if let avatarURLString = postsService.posts[selectedPostIndex].createdByAvatar, let avatarURL = URL(string: avatarURLString) {
@@ -468,8 +468,9 @@ struct CommentSheetView: View {
                     .background(Color.white)
                     .cornerRadius(50)
                     
+                    
                     ForEach(commentsService.comments) { comment in
-                        HStack{
+                        HStack {
                             if let avatarURLString = comment.createdByAvatar, let avatarURL = URL(string: avatarURLString) {
                                 AsyncImage(url: avatarURL) { image in
                                     image
@@ -496,61 +497,67 @@ struct CommentSheetView: View {
                                     .overlay(
                                         Image(systemName: "person.fill")
                                             .resizable()
-                                            .frame(width: 40, height: 30)
+                                            .frame(width: 40, height: 40)
                                             .aspectRatio(contentMode: .fill)
                                             .foregroundColor(.white)
                                     )
                             }
-                            VStack(alignment:.leading){
-                                VStack(alignment: .leading, spacing: 5){
+                            
+                            VStack(alignment: .leading){
+                                VStack(alignment: .leading) {
                                     Text("\(comment.createdByUsername ?? "???")")
                                         .font(.headline)
                                         .fontWeight(.bold)
-                                        .frame(maxWidth: .infinity)
                                         .multilineTextAlignment(.leading)
                                     
                                     Text(comment.message)
                                         .font(.headline)
                                         .fontWeight(.regular)
-                                        .frame(maxWidth: .infinity)
                                         .multilineTextAlignment(.leading)
+                                        .lineLimit(nil) // Remove line limit to allow multiline text
+
                                 }
-                                .padding(EdgeInsets(top: 20, leading: 0, bottom: 20, trailing: 20))
-                                .frame(maxWidth: .infinity)
+                                .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20)) // Adjust padding as needed
                                 .background(Color.white)
                                 .cornerRadius(50)
+
                                 
                                 Text("\(comment.createdAt.timeAgo())")
                                     .font(.subheadline)
                                     .foregroundColor(.gray)
+                                    .padding(.leading, 20)
                             }
+                            
                         }
+                        .padding(.vertical, 5) // Adjust vertical padding as needed
                     }
-
-                    Spacer() // Spacer to push content to the top
                     
-                    // Comment bar
-                    HStack {
-                        TextField("Write a comment...", text: $commentText)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .padding(.horizontal)
-                        
-                        Button(action: {
-                            createComment()
-                        }) {
-                            Text("Send")
-                        }
-                        .padding(.trailing)
-                        .disabled(commentText.isEmpty) // Disable the button if the text field is empty
-                    }
-                    .padding()
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(10)
                 }
-                .padding(EdgeInsets(top: 20, leading: 20, bottom: 0, trailing: 20))
+                .padding(EdgeInsets(top: 20, leading: 20, bottom: 70, trailing: 20))
             }
-            
-            
+            .padding(.bottom, 50)
+            VStack{
+                Spacer() // Spacer to push content to the top
+                
+                // Comment bar
+                HStack {
+                    TextField("Write a comment...", text: $commentText)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding(.horizontal)
+                    
+                    Button(action: {
+                        createComment()
+                    }) {
+                        Text("Send")
+                    }
+                    .padding(.trailing)
+                    .disabled(commentText.isEmpty) // Disable the button if the text field is empty
+                }
+                .padding()
+                .background(Color(red: 242/255, green: 242/255, blue: 247/255))
+                .cornerRadius(10)
+            }
+        
         }
         .onAppear(){
             commentsService.getCommentsByPostId(token: token, postId: postId)
