@@ -17,6 +17,7 @@ struct SignUpView: View {
     @State var confirmPassword = ""
     
     @State private var invalidEmailMessage = false
+    @State private var emailUsed = false
     @State private var validUsername = true
     @State private var passwordValidation = 0;
     @State private var passwordMismatch = false;
@@ -30,13 +31,29 @@ struct SignUpView: View {
     private let authentication = AuthenticationService()
     
     var body: some View {
-        Section(header: Text("Sign up").multilineTextAlignment(.center).bold().fixedSize().font(.largeTitle)) {
-            Form {
-
-                Section(header: Text("Email")){
-                    TextField("Enter your email", text: $email).autocapitalization(/*@START_MENU_TOKEN@*/.none/*@END_MENU_TOKEN@*/)
-                        
-
+        ZStack {
+            Color(red: 242/255, green: 242/255, blue: 247/255)
+                .edgesIgnoringSafeArea(.all)
+            
+            
+            VStack(spacing: 30) {
+                Text("Sign up").multilineTextAlignment(.center).bold().fixedSize().font(.largeTitle)
+                    
+                    HStack{
+                        Image(systemName: "envelope")
+                            .foregroundColor(.gray)
+                            .padding(.leading, 10)
+                            .frame(width: 20, height: 20)
+                        TextField("Enter your email", text: $email)
+                            .autocapitalization(/*@START_MENU_TOKEN@*/.none/*@END_MENU_TOKEN@*/)
+                            .padding(.leading, 10)
+                    }
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(30)
+                    .padding(.horizontal, 30)
+                    
+                    
                     if invalidEmailMessage {
                         Text("Email is invalid")
                             .foregroundColor(Color.red)
@@ -44,14 +61,33 @@ struct SignUpView: View {
                             .frame(maxWidth: .infinity)
                             .listRowBackground(Color(UIColor.systemGroupedBackground))
                     }
-                }
-                
-   
-                
-                Section(header: Text("Username")){
-                    TextField("Enter a username", text: $username).autocapitalization(/*@START_MENU_TOKEN@*/.none/*@END_MENU_TOKEN@*/)
-
                     
+                    if emailUsed {
+                        Text("Email is already used")
+                            .foregroundColor(Color.red)
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity)
+                            .listRowBackground(Color(UIColor.systemGroupedBackground))
+                    }
+                        
+                    
+                    
+                    
+                    
+                    HStack{
+                        Image(systemName: "person")
+                            .foregroundColor(.gray)
+                            .padding(.leading, 10)
+                            .frame(width: 20, height: 20)
+                        TextField("Enter a username", text: $username)
+                            .autocapitalization(/*@START_MENU_TOKEN@*/.none/*@END_MENU_TOKEN@*/)
+                            .padding(.leading, 10)
+                    }
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(30)
+                    .padding(.horizontal, 30)
+                        
                     if !validUsername {
                         Text("Please enter a username")
                             .foregroundColor(Color.red)
@@ -59,11 +95,22 @@ struct SignUpView: View {
                             .frame(maxWidth: .infinity)
                             .listRowBackground(Color(UIColor.systemGroupedBackground))
                     }
-                }
-                
-                Section(header: Text("Password")) {
-                    SecureField("Enter a password", text: $password)
                     
+                    
+                    HStack{
+                        Image(systemName: "key")
+                            .foregroundColor(.gray)
+                            .padding(.leading, 10)
+                            .frame(width: 20, height: 20)
+                        SecureField("Enter your password", text: $password)
+                            .autocapitalization(.none)
+                            .padding(.leading, 10)
+                    }
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(30)
+                    .padding(.horizontal, 30)
+                        
                     if passwordValidation == 1 {
                         Text("Password must be longer than 8 chars")
                             .foregroundColor(Color.red)
@@ -77,11 +124,22 @@ struct SignUpView: View {
                             .frame(maxWidth: .infinity)
                             .listRowBackground(Color(UIColor.systemGroupedBackground))
                     }
-                }
-                
-                Section(header: Text("Confirm Password")) {
-                    SecureField("Repeat password", text: $confirmPassword)
                     
+                    
+                    HStack{
+                        Image(systemName: "key")
+                            .foregroundColor(.gray)
+                            .padding(.leading, 10)
+                            .frame(width: 20, height: 20)
+                        SecureField("Repeat password", text: $confirmPassword)
+                            .autocapitalization(.none)
+                            .padding(.leading, 10)
+                    }
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(30)
+                    .padding(.horizontal, 30)
+                        
                     if passwordMismatch {
                         Text("Passwords do not match")
                             .foregroundColor(Color.red)
@@ -89,9 +147,8 @@ struct SignUpView: View {
                             .frame(maxWidth: .infinity)
                             .listRowBackground(Color(UIColor.systemGroupedBackground))
                     }
-                }
+                    
                 
-                Section {
                     Button("Upload Profile Picture") {
                         showingImagePicker = true
                     }
@@ -99,7 +156,12 @@ struct SignUpView: View {
                         PhotoPicker(image: self.$inputImage, imageSelected: self.$imageSelected)
                     }
                     .multilineTextAlignment(.center)
-                    .frame(maxWidth: .infinity)
+                    .padding(EdgeInsets(top: 15, leading: 30, bottom: 15, trailing: 30))
+                    .fontWeight(.semibold)
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(30)
+                    .padding(.horizontal)
                     
                     if imageSelected {
                         Text("Image uploaded")
@@ -107,62 +169,83 @@ struct SignUpView: View {
                             .frame(maxWidth: .infinity)
                             .listRowBackground(Color(UIColor.systemGroupedBackground))
                     }
-                    
-                }
-                
-                Button("Sign up") {
-                    resetCheckers()
-                    
-                    if !isValidEmail(email: email) {
-                        invalidEmailMessage = true
-                        return
-                    }
-                    
-                    if username == "" {
-                        validUsername = false
-                        return
-                    }
-                    
-                    passwordValidation = isValidPassword(password: password)
-                    if passwordValidation != 0 {
-                        return
-                    }
-                    
-                    if password != confirmPassword {
-                        passwordMismatch = true
-                        return
-                    }
-                    
-                    if let imageData = inputImage?.jpegData(compressionQuality: 0.8) {
-
-                        // Upload the image first
-                        PostsService().uploadImageToCloudinary(imageData: imageData) { result in
-                            switch result {
-                            case .success(let imageUrl):
-                                let user = User(id: nil, username: username, avatar: imageUrl, email: email,  password: password)
-                                let signUpUser = authentication.signUp(user: user)
-                                
-                                if signUpUser {
-                                    resetStates()
-                                }
-                            case .failure(let error):
-                                // Handle the error
-                                print("Image upload failed: \(error.localizedDescription)")
-                            }
-                            
-                        }
-                    } else {
-                        let user = User(id: nil, username: username, avatar: nil, email: email,  password: password)
-                        let signUpUser = authentication.signUp(user: user)
                         
-                        if signUpUser {
-                            signUpSuccessfull = true
-                            resetStates()
+                    
+                    
+                    
+                    
+                    Button("Sign up") {
+                        resetCheckers()
+                        
+                        if !isValidEmail(email: email) {
+                            invalidEmailMessage = true
+                            return
+                        }
+                        
+                        if username == "" {
+                            validUsername = false
+                            return
+                        }
+                        
+                        passwordValidation = isValidPassword(password: password)
+                        if passwordValidation != 0 {
+                            return
+                        }
+                        
+                        if password != confirmPassword {
+                            passwordMismatch = true
+                            return
+                        }
+                        
+                        if let imageData = inputImage?.jpegData(compressionQuality: 0.8) {
+                            // Upload the image first
+                            PostsService().uploadImageToCloudinary(imageData: imageData) { result in
+                                switch result {
+                                case .success(let imageUrl):
+                                    let user = User(id: nil, username: username, avatar: imageUrl, email: email,  password: password)
+                                    if !authenticating(user: user) {
+                                        return
+                                    }
+    //
+                                case .failure(let error):
+                                    // Handle the error
+                                    print("Image upload failed: \(error.localizedDescription)")
+                                }
+                                
+                            }
+                        } else {
+                            let user = User(id: nil, username: username, avatar: nil, email: email,  password: password)
+                            if !authenticating(user: user) {
+                                return
+                            }
                         }
                     }
+                    .padding(EdgeInsets(top: 15, leading: 30, bottom: 15, trailing: 30))
+                    .fontWeight(.semibold)
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(30)
+                    .padding(.horizontal)
                 }
-            }.navigate(to: WelcomePageView(), when: $signUpSuccessfull)
+            }
         }
+    
+    func authenticating(user: User) -> Bool {
+        var status = true
+        authentication.signUp(user: user) { success in
+            if success {
+                DispatchQueue.main.async {
+                    
+                    signUpSuccessfull = true
+                    resetStates()
+                }
+            } else {
+                emailUsed = true
+                status = false
+            }
+            
+        }
+        return status
     }
     
     func resetCheckers() {
@@ -170,6 +253,7 @@ struct SignUpView: View {
         validUsername = true
         passwordValidation = 0
         passwordMismatch = false
+        emailUsed = false
     }
     
     //delete once navigation to login is set
@@ -188,28 +272,4 @@ struct SignUpView_Previews: PreviewProvider {
     }
 }
 
-extension View {
-    /// Navigate to a new view.
-    /// - Parameters:
-    ///   - view: View to navigate to.
-    ///   - binding: Only navigates when this condition is `true`.
-    func navigate<NewView: View>(to view: NewView, when binding: Binding<Bool>) -> some View {
-        NavigationView {
-            ZStack {
-                self
-                    .navigationBarTitle("")
-                    .navigationBarHidden(true)
 
-                NavigationLink(
-                    destination: view
-                        .navigationBarTitle("")
-                        .navigationBarHidden(true),
-                    isActive: binding
-                ) {
-                    EmptyView()
-                }
-            }
-        }
-        .navigationViewStyle(.stack)
-    }
-}
