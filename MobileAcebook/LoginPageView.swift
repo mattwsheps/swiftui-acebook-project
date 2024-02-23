@@ -88,7 +88,7 @@ struct LoginPageView: View {
                         Button(action:{
                             navigateToSignUp = true
                         }){
-                            Text("Sign up here")
+                            Text("Sign up")
                                 .font(.headline)
                                 .padding(.top)
                         }
