@@ -43,6 +43,8 @@ struct FeedPageView: View {
     
     @State private var isShowingCommentSheet = false
     @State private var commentText = ""
+    @State private var postId = ""
+    @State private var selectedPostIndex: Int = 0
     
     @State private var token: String = ""
     @State private var isLoggedOut: Bool = false
@@ -261,7 +263,13 @@ struct FeedPageView: View {
                                 
                                 Button(action: {
                                     // Show the comment sheet
-                                    isShowingCommentSheet.toggle()
+                                    if let index = postsService.posts.firstIndex(of: post) {
+                                        // Set the selected post index
+                                        self.selectedPostIndex = index
+                                        self.postId = post.id
+                                        // Show the comment sheet
+                                        isShowingCommentSheet.toggle()
+                                    }
                                 }) {
                                     Image("comment-icon")
                                         .resizable()
@@ -269,7 +277,7 @@ struct FeedPageView: View {
                                 }
                                 .sheet(isPresented: $isShowingCommentSheet) {
                                     // Content of the comment sheet
-                                    CommentSheetView(commentText: $commentText)
+                                    CommentSheetView(postsService: postsService, commentText: $commentText, postId: $postId, selectedPostIndex: $selectedPostIndex, token: $token)
                                 }
                             }
                             .padding(EdgeInsets(top: 5, leading: 10, bottom: 5, trailing: 10))
@@ -373,47 +381,174 @@ struct FeedPageView: View {
 struct FeedPageView_Previews: PreviewProvider {
     static var previews: some View {
         let mockAuthService = AuthenticationService()
-        mockAuthService.token = "your_desired_token_value"
+        mockAuthService.token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjVkNWU0Njg0ZjE0YTNhYmRkNTA3MjY1IiwiaWF0IjoxNzA4Njg4MTE3LCJleHAiOjE3MDg2OTE3MTd9.XqwlClrnn1udn8dsN6Qs7kH6Agk2HW3ASVmSLy2JgRo"
         return FeedPageView(authService: mockAuthService)
     }
 }
 
 struct CommentSheetView: View {
+    @ObservedObject var postsService: PostsService
+    @ObservedObject var commentsService = CommentsService()
     @Binding var commentText: String
+    @Binding var postId: String
+    @Binding var selectedPostIndex: Int
+    @Binding var token: String
     
     var body: some View {
-        VStack {
-            Text("Comments")
-                .padding()
-            Text("Comments")
-                .padding()
-            Text("Comments")
-                .padding()
-            Text("Comments")
-                .padding()
-            
-            Spacer() // Spacer to push content to the top
-            
-            // Comment bar
-            HStack {
-                TextField("Write a comment...", text: $commentText)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding(.horizontal)
-                
-                Button(action: {
-                    // Action to handle comment submission
-                    print("Comment submitted: \(commentText)")
-                    commentText = "" // Clear text field after submission
-                }) {
-                    Text("Send")
+        ZStack{
+            Color(red: 242/255, green: 242/255, blue: 247/255)
+                .edgesIgnoringSafeArea(.all)
+            VStack {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack{
+                        if let avatarURLString = postsService.posts[selectedPostIndex].createdByAvatar, let avatarURL = URL(string: avatarURLString) {
+                            AsyncImage(url: avatarURL) { image in
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .clipShape(Circle())
+                                    .frame(width: 50, height: 50)
+                            } placeholder: {
+                                Color.gray
+                                    .frame(width: 50, height: 50)
+                                    .clipShape(Circle())
+                                    .overlay(
+                                        Image(systemName: "person.fill")
+                                            .resizable()
+                                            .frame(width: 30, height: 30)
+                                            .aspectRatio(contentMode: .fill)
+                                            .foregroundColor(.white)
+                                    )
+                            }
+                        } else {
+                            Color.gray
+                                .frame(width: 50, height: 50)
+                                .clipShape(Circle())
+                                .overlay(
+                                    Image(systemName: "person.fill")
+                                        .resizable()
+                                        .frame(width: 30, height: 30)
+                                        .aspectRatio(contentMode: .fill)
+                                        .foregroundColor(.white)
+                                )
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 5){
+                            Text("\(postsService.posts[selectedPostIndex].createdByUsername ?? "???")")
+                                .font(.headline)
+                                .fontWeight(.bold)
+                            
+                            Text("\(postsService.posts[selectedPostIndex].createdAt.timeAgo())")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                        }
+                        Spacer()
+                    }
+                    .frame(maxWidth: .infinity)
+                    if let imageURL = URL(string: postsService.posts[selectedPostIndex].image) {
+                        AsyncImageView(imageUrl: imageURL)
+                            .frame(height: 200) // Set the desired frame
+                            .padding()
+                    } else {
+                        // Fallback content if there's no image URL
+                        Text("No image available")
+                    }
+                    
+                    Text(postsService.posts[selectedPostIndex].message)
+                        .padding(EdgeInsets(top: 10, leading: 0, bottom: 10, trailing: 0))
+                        .font(.title3)
+                    
                 }
-                .padding(.trailing)
-                .disabled(commentText.isEmpty) // Disable the button if the text field is empty
+                .padding(EdgeInsets(top: 20, leading: 20, bottom: 20, trailing: 20))
+                .frame(maxWidth: .infinity)
+                .background(Color.white)
+                .cornerRadius(50)
+                
+                ForEach(commentsService.comments) { comment in
+                    HStack{
+                        if let avatarURLString = comment.createdByAvatar, let avatarURL = URL(string: avatarURLString) {
+                            AsyncImage(url: avatarURL) { image in
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .clipShape(Circle())
+                                    .frame(width: 50, height: 50)
+                            } placeholder: {
+                                Color.gray
+                                    .frame(width: 50, height: 50)
+                                    .clipShape(Circle())
+                                    .overlay(
+                                        Image(systemName: "person.fill")
+                                            .resizable()
+                                            .frame(width: 30, height: 30)
+                                            .aspectRatio(contentMode: .fill)
+                                            .foregroundColor(.white)
+                                    )
+                            }
+                        } else {
+                            Color.gray
+                                .frame(width: 50, height: 50)
+                                .clipShape(Circle())
+                                .overlay(
+                                    Image(systemName: "person.fill")
+                                        .resizable()
+                                        .frame(width: 30, height: 30)
+                                        .aspectRatio(contentMode: .fill)
+                                        .foregroundColor(.white)
+                                )
+                        }
+                        VStack{
+                            Text(comment.message)
+                                .padding(EdgeInsets(top: 10, leading: 0, bottom: 10, trailing: 0))
+                                .font(.title3)
+                        }
+                        .padding(EdgeInsets(top: 20, leading: 20, bottom: 20, trailing: 20))
+                        .frame(maxWidth: .infinity)
+                        .background(Color.white)
+                        .cornerRadius(50)
+                        
+                    }
+                    
+                }
+                
+                
+                Spacer() // Spacer to push content to the top
+                
+                // Comment bar
+                HStack {
+                    TextField("Write a comment...", text: $commentText)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding(.horizontal)
+                    
+                    Button(action: {
+                        createComment()
+                    }) {
+                        Text("Send")
+                    }
+                    .padding(.trailing)
+                    .disabled(commentText.isEmpty) // Disable the button if the text field is empty
+                }
+                .padding()
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(10)
+                .padding(.horizontal)
             }
-            .padding()
-            .background(Color.gray.opacity(0.1))
-            .cornerRadius(10)
-            .padding(.horizontal)
+            .padding(EdgeInsets(top: 20, leading: 20, bottom: 0, trailing: 20))
+        }
+        .onAppear(){
+            commentsService.getCommentsByPostId(token: token, postId: postId)
+        }
+    }
+    func createComment() {
+        commentsService.createComment(token: token, postId: postId, message: commentText) { success, error in
+            if success {
+                // Reset the form on success
+                commentText = ""
+                commentsService.getCommentsByPostId(token: token, postId: postId)
+            } else {
+                // Handle the error
+                print(error?.localizedDescription ?? "Failed to create post")
+            }
         }
     }
 }
