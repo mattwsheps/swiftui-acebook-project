@@ -137,7 +137,7 @@ class PostsService: PostsServiceProtocol, ObservableObject {
         }
     func uploadImageToCloudinary(imageData: Data, completion: @escaping (Result<String, Error>) -> Void) {
             let cloudName = "dououppib" // Make sure this is your correct Cloudinary cloud name
-            let uploadPreset = "NEW_PRESET" // Replace with your actual unsigned upload preset
+            let uploadPreset = "Acebook" // Replace with your actual unsigned upload preset
 
             let url = URL(string: "https://api.cloudinary.com/v1_1/\(cloudName)/image/upload")!
             var request = URLRequest(url: url)
